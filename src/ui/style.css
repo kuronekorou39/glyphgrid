@@ -86,3 +86,7 @@ button.shape.on svg [fill="#222222"] { fill: #fff; }
 .help p { color: var(--muted); margin: 0; font-size: 12px; }
 
 .status { grid-area: status; padding: 4px 12px; color: var(--muted); border-top: 1px solid var(--line); background: var(--panel); min-height: 26px; }
+.copy { display: grid; gap: 6px; }
+.copy code { font-size: 11px; background: var(--bg); padding: 6px 8px; border-radius: 4px; word-break: break-all; }
+.copy button { justify-self: start; }
+.warn { color: var(--warning); margin: 0; font-size: 12px; }

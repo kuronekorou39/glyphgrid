@@ -12,6 +12,16 @@ npm run dev        # http://localhost:5173 を開く
 
 `sets/` の JSON を CLI などで書き換えると、画面に即座に反映される。
 
+デスクトップアプリ(Tauri。Rust と MSVC ビルドツールが必要):
+
+```
+npm run app        # 開発版を起動
+npm run app:build  # インストーラを作る
+```
+
+アプリは起動中だけ MCP サーバー(`http://127.0.0.1:7331/mcp`)を内蔵する。右パネルの「アプリ」に Claude Code での登録コマンドが出る。
+環境変数 `GLYPHGRID_SETS`(sets の場所)、`GLYPHGRID_MCP_PORT`、`GLYPHGRID_ROOT`(MCP を動かすリポジトリ)で変えられる。
+
 ## MCP サーバー
 
 Claude Code でこのリポジトリを開くと `.mcp.json` の `glyphgrid` サーバーが使える(初回に承認が必要)。

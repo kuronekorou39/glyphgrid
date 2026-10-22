@@ -9,7 +9,8 @@
 - `src/cli/`:CLI。ファイル I/O は cli / server / mcp だけ
 - `src/server/`:Node 側の共通処理。`sets/` の読み書き API、Vite 開発サーバー用の `/api` と変更通知、PNG 化
 - `src/mcp/`:MCP サーバー(stdio、`.mcp.json` で登録)。core のコマンドをそのまま道具として公開する
-- `src/ui/`:Web UI(Preact)。キャンバスは core の `renderSvg` をそのまま重ねて表示する
+- `src/ui/`:Web UI(Preact)。キャンバスは core の `renderSvg` をそのまま重ねて表示する。`api.ts` がブラウザ(/api)と Tauri(invoke)を切り替える
+- `src-tauri/`:デスクトップアプリ。Rust はファイル I/O・変更監視・MCP(HTTP)の子プロセス起動だけ。検証と整形は TS の core で行う
 - `sets/<set>/style.json` + `icons/*.icon.json`:1セット1スタイル。スタイルを変えればセット全体が揃って変わる
 - 型の定義は `src/core/model.ts`、スタイルは `src/core/style.ts`
 
@@ -46,4 +47,4 @@ LLM の作業手順:`create_icon` → `apply_ops`(最後に `tidy`)→ lint が�
 - M1 core + CLI(完了)
 - M2 Web UI(完了。`npm run dev`)
 - M3 lint、スタイル変更時の一括再書き出し(`export --watch`)(完了)
-- M4 MCP サーバー(完了)、Tauri 化(未着手。ファイル I/O を `src/server/` から Tauri 側に移し、MCP を内蔵する)
+- M4 MCP サーバー、Tauri 化(完了。`npm run app`。MCP は Node が必要で、リポジトリ外へ配布するなら MCP の単体実行ファイル化が要る)

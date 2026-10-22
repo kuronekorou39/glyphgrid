@@ -13,7 +13,8 @@ import {
   type Op,
   type Style,
 } from "../core/index.js";
-import { api, onFileChange, type SetInfo } from "./api.js";
+import { api, onFileChange, type AppInfo, type SetInfo } from "./api.js";
+import { AppPanel } from "./AppPanel.js";
 import { Canvas } from "./Canvas.js";
 import { Inspector, LintPanel, Sidebar, Toolbar } from "./Panels.js";
 import { NODE_FILLS } from "../core/index.js";
@@ -36,6 +37,7 @@ export function App() {
   const [nodeLook, setNodeLook] = useState<NodeLook>({ shape: "circle", fill: "solid" });
   const [edgeLook, setEdgeLook] = useState<EdgeLook>({ route: "straight", dash: "solid", arrow: "none" });
   const [status, setStatus] = useState("");
+  const [appInfo, setAppInfo] = useState<AppInfo | null>(null);
 
   const doc = history?.present ?? null;
   // ファイル監視のハンドラから最新の状態を読むための参照
@@ -47,6 +49,7 @@ export function App() {
   // ---- 読み込み ----
 
   useEffect(() => {
+    api.info().then(setAppInfo).catch(report);
     api
       .listSets()
       .then((list) => {
@@ -302,6 +305,7 @@ export function App() {
       <aside class="inspector">
         {doc && <Inspector doc={doc} selection={selection} onOp={exec} />}
         {doc && <LintPanel issues={issues} onSelect={setSelection} />}
+        {appInfo && <AppPanel info={appInfo} />}
         <section class="panel help">
           <h2>操作</h2>
           <p>
