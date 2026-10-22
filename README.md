@@ -1,6 +1,6 @@
 # glyphgrid
 
-グリッド上のノード(塗り丸・白抜き丸・角丸四角)とエッジ(直線・直角線・斜め線)で、統一デザインのアイコンを作るツール。
+グリッド上のノード(円・四角・ひし形・六角形・三角形)とエッジ(直線・直角線・斜め線、破線・矢印)で、統一デザインのアイコンを作るツール。
 人は GUI で、LLM は CLI / JSON で、同じコマンド群を使って編集する。
 
 ## エディタ
@@ -27,9 +27,9 @@ ops の例:
 
 ```json
 [
-  { "op": "addNode", "id": "a", "kind": "dot", "x": 2, "y": 6 },
-  { "op": "addNode", "id": "b", "kind": "ring", "x": 10, "y": 2 },
-  { "op": "connect", "from": "a", "to": "b", "route": "hvh:6" },
+  { "op": "addNode", "id": "a", "shape": "circle", "fill": "solid", "x": 2, "y": 6 },
+  { "op": "addNode", "id": "b", "shape": "diamond", "fill": "outline", "x": 10, "y": 2 },
+  { "op": "connect", "from": "a", "to": "b", "route": "hvh:6", "arrow": "end" },
   { "op": "tidy" }
 ]
 ```

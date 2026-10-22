@@ -1,23 +1,28 @@
 import type { IconDoc } from "../model.js";
 import type { Style } from "../style.js";
-import { connect, disconnect, setRoute } from "./edges.js";
+import { connect, disconnect, reverse, setArrow, setDash, setRoute } from "./edges.js";
 import { align, centerContent, distribute, mirror, normalizeSize, radial, snapToGrid } from "./layout.js";
-import { addNode, moveNode, nudge, removeNode, setKind, setSize } from "./nodes.js";
+import { addNode, moveNode, nudge, removeNode, setFill, setShape, setSize } from "./nodes.js";
 import { tidy } from "./tidy.js";
 import type { Args, CommandDef } from "./types.js";
 
 export type { Args, Command, CommandDef } from "./types.js";
 
 export const COMMANDS: Record<string, CommandDef> = {
-  addNode: { run: addNode, params: ["kind", "x", "y", "size?", "id?"], summary: "ノードを追加する" },
+  addNode: { run: addNode, params: ["shape", "x", "y", "fill?", "size?", "id?"], summary: "ノードを追加する(shape に dot | ring | square も可)" },
   removeNode: { run: removeNode, params: ["ids"], summary: "ノードと接続エッジを削除する" },
   moveNode: { run: moveNode, params: ["id", "x", "y"], summary: "ノードを移動する" },
   nudge: { run: nudge, params: ["ids", "dx", "dy"], summary: "ノードを相対移動する" },
-  setKind: { run: setKind, params: ["ids", "kind"], summary: "種類を変える" },
+  setShape: { run: setShape, params: ["ids", "shape", "fill?"], summary: "形を変える" },
+  setFill: { run: setFill, params: ["ids", "fill"], summary: "塗りを変える" },
+  setKind: { run: setShape, params: ["ids", "kind"], summary: "旧形式の kind(dot | ring | square)で形と塗りを変える" },
   setSize: { run: setSize, params: ["ids", "size"], summary: "サイズを変える" },
-  connect: { run: connect, params: ["from", "to", "route?", "id?"], summary: "エッジを作る" },
+  connect: { run: connect, params: ["from", "to", "route?", "dash?", "arrow?", "id?"], summary: "エッジを作る" },
   disconnect: { run: disconnect, params: ["ids"], summary: "エッジを消す" },
-  setRoute: { run: setRoute, params: ["ids", "route"], summary: "線種を変える" },
+  setRoute: { run: setRoute, params: ["ids", "route"], summary: "経路を変える" },
+  setDash: { run: setDash, params: ["ids", "dash"], summary: "線種を変える(solid | dashed | dotted)" },
+  setArrow: { run: setArrow, params: ["ids", "arrow"], summary: "矢印を変える(none | end | start | both)" },
+  reverse: { run: reverse, params: ["ids"], summary: "エッジの向きを反転する" },
   align: { run: align, params: ["ids", "mode"], summary: "中心座標を揃える" },
   distribute: { run: distribute, params: ["ids", "direction"], summary: "等間隔に並べる(両端は固定)" },
   normalizeSize: { run: normalizeSize, params: ["ids", "size?"], summary: "サイズを揃える" },

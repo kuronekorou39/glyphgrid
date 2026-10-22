@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from "preact/hooks";
 import { applyOp, edgePathData, findNode, nodeHalfExtent, renderSvg, type IconDoc, type Issue, type Op, type Style } from "../core/index.js";
 import { GRID_STEP, snap } from "../core/commands/util.js";
-import type { Tool } from "./tools.js";
+import type { EdgeLook, NodeLook, Tool } from "./tools.js";
 
 interface Props {
   doc: IconDoc;
@@ -9,7 +9,8 @@ interface Props {
   selection: string[];
   issues: Issue[];
   tool: Tool;
-  route: string;
+  nodeLook: NodeLook;
+  edgeLook: EdgeLook;
   onSelect: (ids: string[]) => void;
   onCommit: (doc: IconDoc) => void;
   onOp: (op: Op) => void;
@@ -28,7 +29,7 @@ type Drag =
 /** キャンバス外周に見せる余白(グリッド単位) */
 const MARGIN = 1;
 
-export function Canvas({ doc, style, selection, issues, tool, route, onSelect, onCommit, onOp }: Props) {
+export function Canvas({ doc, style, selection, issues, tool, nodeLook, edgeLook, onSelect, onCommit, onOp }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [drag, setDrag] = useState<Drag | null>(null);
   const [hover, setHover] = useState<Pt | null>(null);
@@ -56,9 +57,9 @@ export function Canvas({ doc, style, selection, issues, tool, route, onSelect, o
     const node = nodeAt(p);
     const edgeId = (e.target as Element).closest?.("[data-edge]")?.getAttribute("data-edge");
 
-    if (tool === "dot" || tool === "ring" || tool === "square") {
+    if (tool === "node") {
       if (node) onSelect([node.id]);
-      else onOp({ op: "addNode", kind: tool, x: snap(p.x), y: snap(p.y) });
+      else onOp({ op: "addNode", ...nodeLook, x: snap(p.x), y: snap(p.y) });
       return;
     }
     if (node && (tool === "connect" || e.altKey)) {
@@ -106,7 +107,7 @@ export function Canvas({ doc, style, selection, issues, tool, route, onSelect, o
     if (drag.kind === "move" && drag.preview !== drag.base) onCommit(drag.preview);
     if (drag.kind === "connect") {
       const target = nodeAt(toGrid(e));
-      if (target && target.id !== drag.from) onOp({ op: "connect", from: drag.from, to: target.id, route });
+      if (target && target.id !== drag.from) onOp({ op: "connect", from: drag.from, to: target.id, ...edgeLook });
     }
     setDrag(null);
   };
@@ -163,7 +164,7 @@ export function Canvas({ doc, style, selection, issues, tool, route, onSelect, o
           const n = findNode(shown, id);
           if (n) {
             const r = (nodeHalfExtent(style, n) + 0.2) * u;
-            return n.kind === "square" ? (
+            return n.shape === "square" ? (
               <rect x={n.x * u - r} y={n.y * u - r} width={2 * r} height={2 * r} rx={3} />
             ) : (
               <circle cx={n.x * u} cy={n.y * u} r={r} />
@@ -182,7 +183,7 @@ export function Canvas({ doc, style, selection, issues, tool, route, onSelect, o
         })}
       </g>
 
-      {hover && (tool === "dot" || tool === "ring" || tool === "square") && !drag && (
+      {hover && tool === "node" && !drag && (
         <circle class="cursor" cx={hover.x * u} cy={hover.y * u} r={GRID_STEP * u * 0.4} />
       )}
       {drag?.kind === "connect" && fromNode && (

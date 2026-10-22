@@ -1,17 +1,17 @@
 {
-  "version": 1,
+  "version": 2,
   "name": "06-network",
   "canvas": {"cols": 12, "rows": 12},
   "nodes": [
-    {"id": "a1", "kind": "dot", "x": 2, "y": 2, "size": "s"},
-    {"id": "a2", "kind": "dot", "x": 2, "y": 6, "size": "s"},
-    {"id": "a3", "kind": "dot", "x": 2, "y": 10, "size": "s"},
-    {"id": "b1", "kind": "dot", "x": 6, "y": 2, "size": "s"},
-    {"id": "b2", "kind": "dot", "x": 6, "y": 6, "size": "s"},
-    {"id": "b3", "kind": "dot", "x": 6, "y": 10, "size": "s"},
-    {"id": "c1", "kind": "dot", "x": 10, "y": 2, "size": "s"},
-    {"id": "c2", "kind": "dot", "x": 10, "y": 6, "size": "s"},
-    {"id": "c3", "kind": "dot", "x": 10, "y": 10, "size": "s"}
+    {"id": "a1", "shape": "circle", "fill": "solid", "x": 2, "y": 2, "size": "s"},
+    {"id": "a2", "shape": "circle", "fill": "solid", "x": 2, "y": 6, "size": "s"},
+    {"id": "a3", "shape": "circle", "fill": "solid", "x": 2, "y": 10, "size": "s"},
+    {"id": "b1", "shape": "circle", "fill": "solid", "x": 6, "y": 2, "size": "s"},
+    {"id": "b2", "shape": "circle", "fill": "solid", "x": 6, "y": 6, "size": "s"},
+    {"id": "b3", "shape": "circle", "fill": "solid", "x": 6, "y": 10, "size": "s"},
+    {"id": "c1", "shape": "circle", "fill": "solid", "x": 10, "y": 2, "size": "s"},
+    {"id": "c2", "shape": "circle", "fill": "solid", "x": 10, "y": 6, "size": "s"},
+    {"id": "c3", "shape": "circle", "fill": "solid", "x": 10, "y": 10, "size": "s"}
   ],
   "edges": [
     {"id": "e1", "from": "a1", "to": "b1", "route": {"type": "straight"}},

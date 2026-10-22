@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "name": "03-pipeline",
+  "canvas": {"cols": 12, "rows": 12},
+  "nodes": [
+    {"id": "in", "shape": "circle", "fill": "core", "x": 2.5, "y": 7.5, "size": "m"},
+    {"id": "proc", "shape": "square", "fill": "outline", "x": 6, "y": 7.5, "size": "m"},
+    {"id": "out", "shape": "triangle", "fill": "solid", "x": 9.5, "y": 7.5, "size": "m"}
+  ],
+  "edges": [
+    {"id": "e1", "from": "in", "to": "proc", "route": {"type": "straight"}, "arrow": "end"},
+    {"id": "e2", "from": "proc", "to": "out", "route": {"type": "straight"}, "arrow": "end"},
+    {"id": "e3", "from": "out", "to": "in", "route": {"type": "ortho", "bend": "vhv", "mid": 3.5}, "dash": "dashed", "arrow": "end"}
+  ]
+}

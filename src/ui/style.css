@@ -52,7 +52,11 @@ select, input { border: 1px solid var(--line); border-radius: 5px; padding: 3px 
 .stage { grid-area: stage; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 16px; }
 .empty { color: var(--muted); }
 .canvas { width: 100%; height: 100%; touch-action: none; user-select: none; cursor: default; }
-.canvas.tool-dot, .canvas.tool-ring, .canvas.tool-square { cursor: crosshair; }
+.canvas.tool-node { cursor: crosshair; }
+button.shape { width: 32px; height: 30px; padding: 2px; display: inline-flex; align-items: center; justify-content: center; }
+button.shape svg { width: 24px; height: 24px; }
+button.shape.on svg * { stroke: #fff; }
+button.shape.on svg [fill="#222222"] { fill: #fff; }
 .canvas.tool-connect { cursor: alias; }
 .paper { fill: #fff; stroke: var(--line); }
 .safe-area { fill: none; stroke: var(--accent); stroke-opacity: .25; stroke-dasharray: 4 4; }

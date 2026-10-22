@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "name": "01-decision",
+  "canvas": {"cols": 12, "rows": 12},
+  "nodes": [
+    {"id": "start", "shape": "circle", "fill": "solid", "x": 2, "y": 6, "size": "m"},
+    {"id": "q", "shape": "diamond", "fill": "outline", "x": 6, "y": 6, "size": "m"},
+    {"id": "yes", "shape": "square", "fill": "outline", "x": 10, "y": 2, "size": "m"},
+    {"id": "no", "shape": "square", "fill": "outline", "x": 10, "y": 10, "size": "m"}
+  ],
+  "edges": [
+    {"id": "e1", "from": "start", "to": "q", "route": {"type": "straight"}, "arrow": "end"},
+    {"id": "e2", "from": "q", "to": "yes", "route": {"type": "ortho", "bend": "vh"}, "arrow": "end"},
+    {"id": "e3", "from": "q", "to": "no", "route": {"type": "ortho", "bend": "vh"}, "dash": "dashed", "arrow": "end"}
+  ]
+}

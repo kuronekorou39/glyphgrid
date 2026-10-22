@@ -2,7 +2,8 @@ import { contentBounds } from "../commands/layout.js";
 import { GRID_STEP } from "../commands/util.js";
 import { edgePolyline, type Point } from "../geometry.js";
 import { EPS, findNode, type IconDoc, type IconNode } from "../model.js";
-import { nodeHalfExtent, type Style } from "../style.js";
+import { boundaryPoints, nodeBounds, outline, signedDistance } from "../shape.js";
+import type { Style } from "../style.js";
 
 export type Severity = "error" | "warning";
 export type Rule =
@@ -12,7 +13,8 @@ export type Rule =
   | "dangling-edge"
   | "out-of-bounds"
   | "off-center"
-  | "inconsistent-size";
+  | "inconsistent-size"
+  | "short-edge";
 
 export interface Issue {
   rule: Rule;
@@ -23,6 +25,8 @@ export interface Issue {
 
 /** ノード同士の外形の隙間がこれ未満なら「近すぎる」 */
 const MIN_NODE_GAP = 0.5;
+/** 矢じりの分を除いて、線として見えていてほしい最小の長さ */
+const MIN_EDGE_LENGTH = 0.5;
 /** 内容の中心がキャンバス中央からこれ以上ずれたら警告(centerContent は 0.5 刻みで寄せるため) */
 const MAX_CENTER_OFFSET = GRID_STEP / 2;
 
@@ -54,27 +58,20 @@ function dangling(doc: IconDoc): Issue[] {
 
 /** 点から外形までの距離(内側なら負) */
 function distanceToShape(p: Point, node: IconNode, style: Style): number {
-  const h = nodeHalfExtent(style, node);
-  const dx = Math.abs(p.x - node.x);
-  const dy = Math.abs(p.y - node.y);
-  if (node.kind !== "square") return Math.hypot(dx, dy) - h;
-  const ox = dx - h;
-  const oy = dy - h;
-  return ox > 0 || oy > 0 ? Math.hypot(Math.max(ox, 0), Math.max(oy, 0)) : Math.max(ox, oy);
+  return signedDistance(outline(style, node), p);
 }
 
-/** 2ノードの外形の隙間(重なっていれば負)。四角は軸平行の箱として扱う */
+/**
+ * 2ノードの外形の隙間(重なっていれば負)。
+ * 円どうしは厳密に、それ以外は互いの外形上の点から相手までの距離の最小値で近似する
+ */
 function nodeGap(a: IconNode, b: IconNode, style: Style): number {
-  const ha = nodeHalfExtent(style, a);
-  const hb = nodeHalfExtent(style, b);
-  if (a.kind !== "square" && b.kind !== "square") return Math.hypot(a.x - b.x, a.y - b.y) - ha - hb;
-  if (a.kind === "square" && b.kind === "square") {
-    const ox = Math.abs(a.x - b.x) - ha - hb;
-    const oy = Math.abs(a.y - b.y) - ha - hb;
-    return ox > 0 || oy > 0 ? Math.hypot(Math.max(ox, 0), Math.max(oy, 0)) : Math.max(ox, oy);
-  }
-  const [circle, square] = a.kind === "square" ? [b, a] : [a, b];
-  return distanceToShape(circle, square, style) - nodeHalfExtent(style, circle);
+  const oa = outline(style, a);
+  const ob = outline(style, b);
+  if (oa.type === "circle" && ob.type === "circle") return Math.hypot(a.x - b.x, a.y - b.y) - oa.r - ob.r;
+  const one = Math.min(...boundaryPoints(oa).map((p) => signedDistance(ob, p)));
+  const two = Math.min(...boundaryPoints(ob).map((p) => signedDistance(oa, p)));
+  return Math.min(one, two);
 }
 
 function overlap(doc: IconDoc, style: Style): Issue[] {
@@ -113,12 +110,29 @@ function edgeThroughNode(doc: IconDoc, style: Style): Issue[] {
     const from = findNode(doc, e.from);
     const to = findNode(doc, e.to);
     if (!from || !to) continue;
-    const pts = edgePolyline(style, e.route, from, to);
+    const pts = edgePolyline(style, e.route, from, to, e.arrow);
     for (const n of doc.nodes) {
       if (n.id === e.from || n.id === e.to) continue;
       const hit = pts.slice(1).some((p, i) => segmentDistance(pts[i]!, p, n, style) < halfWidth - EPS);
       if (hit) issues.push({ rule: "edge-through-node", severity: "error", ids: [e.id, n.id], message: `${e.id}(${e.from}→${e.to})が ${n.id} に重なっています` });
     }
+  }
+  return issues;
+}
+
+/** 見えている線の長さが、矢じりを描くのに足りない(矢じり同士やノードとくっついて潰れる) */
+function shortEdge(doc: IconDoc, style: Style): Issue[] {
+  const issues: Issue[] = [];
+  for (const e of doc.edges) {
+    const from = findNode(doc, e.from);
+    const to = findNode(doc, e.to);
+    if (!from || !to) continue;
+    const pts = edgePolyline(style, e.route, from, to, e.arrow);
+    const length = pts.slice(1).reduce((s, p, i) => s + Math.hypot(p.x - pts[i]!.x, p.y - pts[i]!.y), 0);
+    const heads = e.arrow === "both" ? 2 : e.arrow ? 1 : 0;
+    const need = MIN_EDGE_LENGTH + heads * style.arrow.size;
+    if (length < need - EPS)
+      issues.push({ rule: "short-edge", severity: "warning", ids: [e.id], message: `${e.id} の見えている長さが ${fmt(length)} で短すぎます(${fmt(need)} 以上)。ノードの間隔を広げてください` });
   }
   return issues;
 }
@@ -132,8 +146,8 @@ function bounds(doc: IconDoc, style: Style): Issue[] {
   if (b.minX < p - EPS || b.minY < p - EPS || b.maxX > cols - p + EPS || b.maxY > rows - p + EPS) {
     const outside = doc.nodes
       .filter((n) => {
-        const h = nodeHalfExtent(style, n);
-        return n.x - h < p - EPS || n.y - h < p - EPS || n.x + h > cols - p + EPS || n.y + h > rows - p + EPS;
+        const nb = nodeBounds(style, n);
+        return nb.minX < p - EPS || nb.minY < p - EPS || nb.maxX > cols - p + EPS || nb.maxY > rows - p + EPS;
       })
       .map((n) => n.id);
     issues.push({
@@ -157,19 +171,19 @@ function inconsistentSize(doc: IconDoc): Issue[] {
   for (const e of doc.edges) for (const id of [e.from, e.to]) degree.set(id, (degree.get(id) ?? 0) + 1);
   const groups = new Map<string, IconNode[]>();
   for (const n of doc.nodes) {
-    const key = `${n.kind}/${degree.get(n.id) ?? 0}`;
+    const key = `${n.shape}(${n.fill})/${degree.get(n.id) ?? 0}`;
     groups.set(key, [...(groups.get(key) ?? []), n]);
   }
   const issues: Issue[] = [];
   for (const [key, nodes] of groups) {
     const sizes = new Set(nodes.map((n) => n.size));
     if (nodes.length < 2 || sizes.size < 2) continue;
-    const [kind, deg] = key.split("/");
+    const [look, deg] = key.split("/");
     issues.push({
       rule: "inconsistent-size",
       severity: "warning",
       ids: nodes.map((n) => n.id),
-      message: `接続数 ${deg} の ${kind} でサイズが混在しています(${[...sizes].join(", ")})。normalizeSize で揃えられます`,
+      message: `接続数 ${deg} の ${look} でサイズが混在しています(${[...sizes].join(", ")})。normalizeSize で揃えられます`,
     });
   }
   return issues;
@@ -181,6 +195,7 @@ export function lint(doc: IconDoc, style: Style): Issue[] {
     ...offGrid(doc),
     ...overlap(doc, style),
     ...edgeThroughNode(doc, style),
+    ...shortEdge(doc, style),
     ...bounds(doc, style),
     ...inconsistentSize(doc),
   ];

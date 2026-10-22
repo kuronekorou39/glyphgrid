@@ -1,15 +1,15 @@
 {
-  "version": 1,
+  "version": 2,
   "name": "01-flow-z",
   "canvas": {"cols": 12, "rows": 12},
   "nodes": [
-    {"id": "a1", "kind": "dot", "x": 2, "y": 2, "size": "m"},
-    {"id": "a2", "kind": "square", "x": 6, "y": 2, "size": "m"},
-    {"id": "a3", "kind": "ring", "x": 10, "y": 2, "size": "m"},
-    {"id": "m", "kind": "ring", "x": 6, "y": 6, "size": "m"},
-    {"id": "b1", "kind": "ring", "x": 2, "y": 10, "size": "m"},
-    {"id": "b2", "kind": "square", "x": 6, "y": 10, "size": "m"},
-    {"id": "b3", "kind": "dot", "x": 10, "y": 10, "size": "m"}
+    {"id": "a1", "shape": "circle", "fill": "solid", "x": 2, "y": 2, "size": "m"},
+    {"id": "a2", "shape": "square", "fill": "outline", "x": 6, "y": 2, "size": "m"},
+    {"id": "a3", "shape": "circle", "fill": "outline", "x": 10, "y": 2, "size": "m"},
+    {"id": "m", "shape": "circle", "fill": "outline", "x": 6, "y": 6, "size": "m"},
+    {"id": "b1", "shape": "circle", "fill": "outline", "x": 2, "y": 10, "size": "m"},
+    {"id": "b2", "shape": "square", "fill": "outline", "x": 6, "y": 10, "size": "m"},
+    {"id": "b3", "shape": "circle", "fill": "solid", "x": 10, "y": 10, "size": "m"}
   ],
   "edges": [
     {"id": "e1", "from": "a1", "to": "a2", "route": {"type": "straight"}},

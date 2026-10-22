@@ -20,6 +20,13 @@
 - 描画:エッジが先、ノードが後。エッジはノードの外形で切る(背景で隠さない)。線幅・色はスタイルからのみ取る
 - 迷ったら「LLM が ops だけで同じ結果を出せるか」を基準にする
 
+## 要素
+
+- ノード:`shape`(circle / square / diamond / hexagon / triangle)× `fill`(solid / outline / core)× `size`(s / m / l)。実寸は style.json
+- エッジ:`route` に加えて `dash`(dashed / dotted)と `arrow`(end / start / both)。省略時は実線・矢印なし
+- 旧形式(version 1 の `kind`: dot / ring / square)は読み込み時に変換する。ops でも `kind` や `shape: "dot"` を別名として受け付ける
+- 要素を足すときは「形・塗り・線の種類」のようにトークンとして足し、寸法やパターンは style.json に置く
+
 ## CLI
 
 `npm run glyphgrid -- <command>`。`commands` でコマンドと引数順の一覧が出る。

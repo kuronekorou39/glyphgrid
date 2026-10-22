@@ -1,10 +1,8 @@
-import { EPS, type IconNode, type Route } from "./model.js";
-import { nodeHalfExtent, type Style } from "./style.js";
+import { EPS, type IconEdge, type IconNode, type Route } from "./model.js";
+import { outline, signedDistance, type Point } from "./shape.js";
+import type { Style } from "./style.js";
 
-export interface Point {
-  x: number;
-  y: number;
-}
+export type { Point };
 
 const dist = (a: Point, b: Point) => Math.hypot(b.x - a.x, b.y - a.y);
 const same = (a: Point, b: Point) => Math.abs(a.x - b.x) < EPS && Math.abs(a.y - b.y) < EPS;
@@ -69,15 +67,18 @@ export function routePoints(route: Route, a: Point, b: Point): Point[] {
 }
 
 /**
- * エッジを切る位置となる外形。線幅の中心線で切るので、丸い線端がちょうど
- * 白抜き丸・四角の線の内側の縁で止まり、内部に線が入らない。
+ * エッジを切る位置となる外形の内側判定。
+ * 矢印なしの端は線幅の中心線で切るので、丸い線端がちょうど白抜きの線の内側の縁で止まり、内部に線が入らない。
+ * 矢印のある端は、矢じりの先がノードの外形から gap だけ離れた位置にくるように切る。
  */
-export function insideTest(style: Style, node: IconNode): (p: Point) => boolean {
-  const r = nodeHalfExtent(style, node) - style.stroke.width / 2;
-  if (node.kind === "square") {
-    return (p) => Math.abs(p.x - node.x) < r - EPS && Math.abs(p.y - node.y) < r - EPS;
-  }
-  return (p) => Math.hypot(p.x - node.x, p.y - node.y) < r - EPS;
+export function insideTest(style: Style, node: IconNode, arrow = false): (p: Point) => boolean {
+  const inset = arrow ? -style.arrow.gap : style.stroke.width / 2;
+  const o = outline(style, node, inset);
+  return (p) => signedDistance(o, p) < -EPS;
+}
+
+export function arrowAt(edge: Pick<IconEdge, "arrow">, end: "start" | "end"): boolean {
+  return edge.arrow === "both" || edge.arrow === end;
 }
 
 /** inside(a) かつ !inside(b) の区間で、外形との交点を二分探索で求める */
@@ -101,11 +102,11 @@ function trimStart(points: Point[], inside: (p: Point) => boolean): Point[] {
   return [crossing(points[i - 1]!, points[i]!, inside), ...points.slice(i)];
 }
 
-/** ノード外形で両端を切った折れ線 */
-export function edgePolyline(style: Style, route: Route, from: IconNode, to: IconNode): Point[] {
+/** ノード外形で両端を切った折れ線。矢印のある端は矢じりの先の位置になる */
+export function edgePolyline(style: Style, route: Route, from: IconNode, to: IconNode, arrow: IconEdge["arrow"] = undefined): Point[] {
   let pts = routePoints(route, from, to);
-  pts = trimStart(pts, insideTest(style, from));
-  pts = trimStart(pts.reverse(), insideTest(style, to)).reverse();
+  pts = trimStart(pts, insideTest(style, from, arrowAt({ arrow }, "start")));
+  pts = trimStart(pts.reverse(), insideTest(style, to, arrowAt({ arrow }, "end"))).reverse();
   return pts.length >= 2 && dist(pts[0]!, pts[pts.length - 1]!) > EPS ? pts : [];
 }
 

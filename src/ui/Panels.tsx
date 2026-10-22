@@ -1,7 +1,94 @@
 import { useState } from "preact/hooks";
-import { NODE_KINDS, SIZE_TOKENS, findNode, renderSvg, type IconDoc, type Issue, type Op, type Route, type Style } from "../core/index.js";
+import {
+  EDGE_ARROWS,
+  EDGE_DASHES,
+  NODE_FILLS,
+  NODE_SHAPES,
+  SIZE_TOKENS,
+  findNode,
+  renderSvg,
+  type IconDoc,
+  type EdgeArrow,
+  type EdgeDash,
+  type IconEdge,
+  type IconNode,
+  type Issue,
+  type Op,
+  type Route,
+  type Style,
+} from "../core/index.js";
 import type { SetInfo } from "./api.js";
-import { ROUTES, TOOLS, type Tool } from "./tools.js";
+import {
+  ARROW_LABELS,
+  DASH_LABELS,
+  FILL_LABELS,
+  ROUTES,
+  SHAPE_LABELS,
+  lookIcon,
+  type EdgeLook,
+  type NodeLook,
+  type Tool,
+} from "./tools.js";
+
+// ---- 共通の入力部品 ----
+
+function Select<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: T | "";
+  options: { value: T; label: string }[];
+  onChange: (v: T) => void;
+}) {
+  return (
+    <label class="field">
+      <span>{label}</span>
+      <select value={value} onChange={(e) => onChange((e.target as HTMLSelectElement).value as T)}>
+        {value === "" && (
+          <option value="" disabled>
+            変更…
+          </option>
+        )}
+        {options.map((o) => (
+          <option value={o.value}>{o.label}</option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function NumberField({ label, value, step = 0.5, onChange }: { label: string; value: number | undefined; step?: number; onChange: (v: number | undefined) => void }) {
+  return (
+    <label class="field">
+      <span>{label}</span>
+      <input
+        type="number"
+        step={step}
+        value={value ?? ""}
+        placeholder="自動"
+        onChange={(e) => {
+          const raw = (e.target as HTMLInputElement).value;
+          onChange(raw === "" ? undefined : Number(raw));
+        }}
+      />
+    </label>
+  );
+}
+
+const shapeOptions = NODE_SHAPES.map((s) => ({ value: s, label: SHAPE_LABELS[s] }));
+const fillOptions = NODE_FILLS.map((f) => ({ value: f, label: FILL_LABELS[f] }));
+const sizeOptions = SIZE_TOKENS.map((s) => ({ value: s, label: s }));
+const dashOptions = EDGE_DASHES.map((d) => ({ value: d, label: DASH_LABELS[d] }));
+const arrowOptions = EDGE_ARROWS.map((a) => ({ value: a, label: ARROW_LABELS[a] }));
+
+/** 複数選択で値がそろっていればその値、ばらばらなら "" */
+function common<T>(items: T[], get: (x: T) => string): string {
+  const values = new Set(items.map(get));
+  return values.size === 1 ? [...values][0]! : "";
+}
 
 // ---- サイドバー(セットとアイコンの一覧) ----
 
@@ -57,36 +144,62 @@ export function Sidebar({ sets, set, icon, thumbs, style, onSet, onIcon, onCreat
 
 interface ToolbarProps {
   tool: Tool;
-  route: string;
+  nodeLook: NodeLook;
+  edgeLook: EdgeLook;
+  style: Style;
   selectedNodes: string[];
   canUndo: boolean;
   canRedo: boolean;
   onTool: (t: Tool) => void;
-  onRoute: (r: string) => void;
+  onNodeLook: (l: NodeLook) => void;
+  onEdgeLook: (l: Partial<EdgeLook>) => void;
   onOp: (op: Op) => void;
   onUndo: () => void;
   onRedo: () => void;
 }
 
-export function Toolbar({ tool, route, selectedNodes: ids, canUndo, canRedo, onTool, onRoute, onOp, onUndo, onRedo }: ToolbarProps) {
+export function Toolbar(p: ToolbarProps) {
+  const ids = p.selectedNodes;
   const btn = (label: string, op: Op, min: number, title?: string) => (
-    <button disabled={ids.length < min} title={title} onClick={() => onOp(op)}>
+    <button disabled={ids.length < min} title={title} onClick={() => p.onOp(op)}>
       {label}
     </button>
+  );
+  const pick = <T extends string>(value: T, options: { value: T; label: string }[], onChange: (v: T) => void, title: string) => (
+    <select value={value} title={title} onChange={(e) => onChange((e.target as HTMLSelectElement).value as T)}>
+      {options.map((o) => (
+        <option value={o.value}>{o.label}</option>
+      ))}
+    </select>
   );
   return (
     <header class="toolbar">
       <div class="group">
-        {TOOLS.map((t) => (
-          <button class={tool === t.tool ? "on" : ""} title={`ショートカット: ${t.key}`} onClick={() => onTool(t.tool)}>
-            {t.label}
-          </button>
+        <button class={p.tool === "select" ? "on" : ""} title="選択(V)" onClick={() => p.onTool("select")}>
+          選択
+        </button>
+        <button class={p.tool === "connect" ? "on" : ""} title="接続(C)" onClick={() => p.onTool("connect")}>
+          接続
+        </button>
+      </div>
+      <div class="group">
+        {NODE_SHAPES.map((shape, i) => (
+          <button
+            class={`shape ${p.tool === "node" && p.nodeLook.shape === shape ? "on" : ""}`}
+            title={`${SHAPE_LABELS[shape]}を置く(${i + 1})`}
+            onClick={() => {
+              p.onNodeLook({ ...p.nodeLook, shape });
+              p.onTool("node");
+            }}
+            dangerouslySetInnerHTML={{ __html: lookIcon({ ...p.nodeLook, shape }, p.style) }}
+          />
         ))}
-        <select value={route} title="新しいエッジの線種(選択中のエッジにも適用)" onChange={(e) => onRoute((e.target as HTMLSelectElement).value)}>
-          {ROUTES.map((r) => (
-            <option value={r.value}>{r.label}</option>
-          ))}
-        </select>
+        {pick(p.nodeLook.fill, fillOptions, (fill) => p.onNodeLook({ ...p.nodeLook, fill }), "置くノードの塗り(F で切り替え)")}
+      </div>
+      <div class="group">
+        {pick(p.edgeLook.route, ROUTES, (route) => p.onEdgeLook({ route }), "新しいエッジの経路(選択中のエッジにも適用)")}
+        {pick(p.edgeLook.dash, dashOptions, (dash) => p.onEdgeLook({ dash }), "新しいエッジの線種(選択中のエッジにも適用)")}
+        {pick(p.edgeLook.arrow, arrowOptions, (arrow) => p.onEdgeLook({ arrow }), "新しいエッジの矢印(選択中のエッジにも適用)")}
       </div>
       <div class="group">
         {btn("左", { op: "align", ids, mode: "left" }, 2, "左揃え")}
@@ -106,10 +219,10 @@ export function Toolbar({ tool, route, selectedNodes: ids, canUndo, canRedo, onT
         {btn("吸着", { op: "snapToGrid" }, 0)}
         {btn("中央寄せ", { op: "centerContent" }, 0)}
         {btn("tidy", { op: "tidy" }, 0)}
-        <button disabled={!canUndo} onClick={onUndo} title="Ctrl+Z">
+        <button disabled={!p.canUndo} onClick={p.onUndo} title="Ctrl+Z">
           元に戻す
         </button>
-        <button disabled={!canRedo} onClick={onRedo} title="Ctrl+Shift+Z">
+        <button disabled={!p.canRedo} onClick={p.onRedo} title="Ctrl+Shift+Z">
           やり直す
         </button>
       </div>
@@ -125,26 +238,33 @@ interface InspectorProps {
   onOp: (op: Op) => void;
 }
 
-function NumberField({ label, value, step = 0.5, onChange }: { label: string; value: number | undefined; step?: number; onChange: (v: number | undefined) => void }) {
+function routeShorthand(r: Route): string {
+  return r.type === "straight" ? "straight" : r.bend;
+}
+
+function NodeFields({ nodes, onOp }: { nodes: IconNode[]; onOp: (op: Op) => void }) {
+  const ids = nodes.map((n) => n.id);
   return (
-    <label class="field">
-      <span>{label}</span>
-      <input
-        type="number"
-        step={step}
-        value={value ?? ""}
-        placeholder="自動"
-        onChange={(e) => {
-          const raw = (e.target as HTMLInputElement).value;
-          onChange(raw === "" ? undefined : Number(raw));
-        }}
-      />
-    </label>
+    <>
+      <Select label="形" value={common(nodes, (n) => n.shape) as IconNode["shape"] | ""} options={shapeOptions} onChange={(shape) => onOp({ op: "setShape", ids, shape })} />
+      <Select label="塗り" value={common(nodes, (n) => n.fill) as IconNode["fill"] | ""} options={fillOptions} onChange={(fill) => onOp({ op: "setFill", ids, fill })} />
+      <Select label="サイズ" value={common(nodes, (n) => n.size) as IconNode["size"] | ""} options={sizeOptions} onChange={(size) => onOp({ op: "setSize", ids, size })} />
+    </>
   );
 }
 
-function routeShorthand(r: Route): string {
-  return r.type === "straight" ? "straight" : r.bend;
+function EdgeLookFields({ edges, onOp }: { edges: IconEdge[]; onOp: (op: Op) => void }) {
+  const ids = edges.map((e) => e.id);
+  return (
+    <>
+      <Select label="線種" value={common(edges, (e) => e.dash ?? "solid") as EdgeDash | ""} options={dashOptions} onChange={(dash) => onOp({ op: "setDash", ids, dash })} />
+      <Select label="矢印" value={common(edges, (e) => e.arrow ?? "none") as EdgeArrow | ""} options={arrowOptions} onChange={(arrow) => onOp({ op: "setArrow", ids, arrow })} />
+      <div class="field">
+        <span />
+        <button onClick={() => onOp({ op: "reverse", ids })}>向きを反転</button>
+      </div>
+    </>
+  );
 }
 
 export function Inspector({ doc, selection, onOp }: InspectorProps) {
@@ -156,22 +276,7 @@ export function Inspector({ doc, selection, onOp }: InspectorProps) {
     return (
       <section class="panel">
         <h2>ノード {n.id}</h2>
-        <label class="field">
-          <span>種類</span>
-          <select value={n.kind} onChange={(e) => onOp({ op: "setKind", ids: [n.id], kind: (e.target as HTMLSelectElement).value })}>
-            {NODE_KINDS.map((k) => (
-              <option value={k}>{k}</option>
-            ))}
-          </select>
-        </label>
-        <label class="field">
-          <span>サイズ</span>
-          <select value={n.size} onChange={(e) => onOp({ op: "setSize", ids: [n.id], size: (e.target as HTMLSelectElement).value })}>
-            {SIZE_TOKENS.map((s) => (
-              <option value={s}>{s}</option>
-            ))}
-          </select>
-        </label>
+        <NodeFields nodes={nodes} onOp={onOp} />
         <NumberField label="x" value={n.x} onChange={(v) => v !== undefined && onOp({ op: "moveNode", id: n.id, x: v, y: n.y })} />
         <NumberField label="y" value={n.y} onChange={(v) => v !== undefined && onOp({ op: "moveNode", id: n.id, x: n.x, y: v })} />
       </section>
@@ -182,28 +287,17 @@ export function Inspector({ doc, selection, onOp }: InspectorProps) {
     const e = edges[0]!;
     const r = e.route;
     const setRoute = (route: Route) => onOp({ op: "setRoute", id: e.id, route });
-    const hasMid = r.type !== "straight" && r.bend !== "hv" && r.bend !== "vh" ? r : null;
+    const withMid = r.type !== "straight" && r.bend !== "hv" && r.bend !== "vh" ? r : null;
     return (
       <section class="panel">
         <h2>エッジ {e.id}</h2>
         <p class="muted">
           {e.from} → {e.to}
         </p>
-        <label class="field">
-          <span>線種</span>
-          <select
-            value={routeShorthand(r)}
-            onChange={(ev) => onOp({ op: "setRoute", id: e.id, route: (ev.target as HTMLSelectElement).value })}
-          >
-            {ROUTES.map((x) => (
-              <option value={x.value}>{x.label}</option>
-            ))}
-          </select>
-        </label>
-        {hasMid && (
-          <NumberField label="mid" value={hasMid.mid} onChange={(v) => setRoute({ ...hasMid, mid: v })} />
-        )}
+        <Select label="経路" value={routeShorthand(r)} options={ROUTES} onChange={(route) => onOp({ op: "setRoute", id: e.id, route })} />
+        {withMid && <NumberField label="mid" value={withMid.mid} onChange={(v) => setRoute({ ...withMid, mid: v })} />}
         {r.type === "slant" && <NumberField label="span" value={r.span} onChange={(v) => setRoute({ ...r, span: v })} />}
+        <EdgeLookFields edges={edges} onOp={onOp} />
       </section>
     );
   }
@@ -215,19 +309,8 @@ export function Inspector({ doc, selection, onOp }: InspectorProps) {
         <p class="muted">
           ノード {nodes.length}、エッジ {edges.length}
         </p>
-        {nodes.length > 0 && (
-          <label class="field">
-            <span>サイズ</span>
-            <select value="" onChange={(e) => onOp({ op: "setSize", ids: nodes.map((n) => n.id), size: (e.target as HTMLSelectElement).value })}>
-              <option value="" disabled>
-                変更…
-              </option>
-              {SIZE_TOKENS.map((s) => (
-                <option value={s}>{s}</option>
-              ))}
-            </select>
-          </label>
-        )}
+        {nodes.length > 0 && <NodeFields nodes={nodes} onOp={onOp} />}
+        {edges.length > 0 && <EdgeLookFields edges={edges} onOp={onOp} />}
       </section>
     );
   }

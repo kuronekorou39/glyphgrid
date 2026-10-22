@@ -1,0 +1,18 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`エッジの線種と矢印 > 新しい形と塗りの描画 1`] = `
+"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 288" width="288" height="288">
+<g fill="none" stroke="#222222" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M98.109 72L187.137 72" stroke-dasharray="0 14.4"/>
+<path d="M173.375 62.364L187.137 72L173.375 81.636"/>
+<path d="M91.919 216L188.4 216"/>
+<path d="M174.638 206.364L188.4 216L174.638 225.636M105.68 225.636L91.919 216L105.68 206.364"/>
+<path d="M72 45.891L98.109 72L72 98.109L45.891 72Z" fill="#222222"/>
+<path d="M216 49.757L235.263 60.878L235.263 83.122L216 94.243L196.737 83.122L196.737 60.878Z"/>
+<path d="M216 65.597L221.545 68.798L221.545 75.202L216 78.403L210.455 75.202L210.455 68.798Z" fill="#222222"/>
+<path d="M72 200.7L91.745 234.9L52.255 234.9Z"/>
+<rect x="198" y="198" width="36" height="36" rx="2.88" fill="#222222"/>
+</g>
+</svg>
+"
+`;

@@ -1,4 +1,20 @@
-import { NODE_KINDS, SIZE_TOKENS, requireNode, validateRoute, type IconDoc, type IconNode, type NodeKind, type Route, type SizeToken } from "../model.js";
+import {
+  EDGE_ARROWS,
+  EDGE_DASHES,
+  LEGACY_KINDS,
+  NODE_FILLS,
+  NODE_SHAPES,
+  SIZE_TOKENS,
+  requireNode,
+  validateRoute,
+  type IconDoc,
+  type IconEdge,
+  type IconNode,
+  type NodeFill,
+  type NodeShape,
+  type Route,
+  type SizeToken,
+} from "../model.js";
 
 /** コマンドの出力座標は 0.5 グリッド刻みにそろえる */
 export const GRID_STEP = 0.5;
@@ -27,9 +43,40 @@ export function str(v: unknown, name: string): string {
   return v;
 }
 
-export function kind(v: unknown): NodeKind {
-  if (!NODE_KINDS.includes(v as NodeKind)) throw new Error(`kind は ${NODE_KINDS.join(" | ")} のいずれかです(${JSON.stringify(v)})`);
-  return v as NodeKind;
+export function shape(v: unknown): NodeShape {
+  if (!NODE_SHAPES.includes(v as NodeShape)) throw new Error(`shape は ${NODE_SHAPES.join(" | ")} のいずれかです(${JSON.stringify(v)})`);
+  return v as NodeShape;
+}
+
+export function fill(v: unknown): NodeFill {
+  if (!NODE_FILLS.includes(v as NodeFill)) throw new Error(`fill は ${NODE_FILLS.join(" | ")} のいずれかです(${JSON.stringify(v)})`);
+  return v as NodeFill;
+}
+
+/**
+ * args から形と塗りを読む。旧形式の kind(dot | ring | square)や、
+ * shape に kind 名を渡した場合も受け付ける。指定のない項目は undefined
+ */
+export function shapeAndFill(args: Record<string, unknown>): { shape?: NodeShape; fill?: NodeFill } {
+  const legacyName = [args.kind, args.shape].find((v) => typeof v === "string" && v in LEGACY_KINDS) as string | undefined;
+  if (args.kind !== undefined && !legacyName) throw new Error(`kind は ${Object.keys(LEGACY_KINDS).join(" | ")} のいずれかです(${JSON.stringify(args.kind)})`);
+  const legacy = legacyName ? LEGACY_KINDS[legacyName] : undefined;
+  return {
+    shape: legacy?.shape ?? (args.shape === undefined ? undefined : shape(args.shape)),
+    fill: args.fill === undefined ? legacy?.fill : fill(args.fill),
+  };
+}
+
+/** dash を読む。"solid" は省略(undefined)として返す */
+export function dash(v: unknown): IconEdge["dash"] {
+  const d = oneOf(v, EDGE_DASHES, "dash");
+  return d === "solid" ? undefined : d;
+}
+
+/** arrow を読む。"none" は省略(undefined)として返す */
+export function arrow(v: unknown): IconEdge["arrow"] {
+  const a = oneOf(v, EDGE_ARROWS, "arrow");
+  return a === "none" ? undefined : a;
 }
 
 export function size(v: unknown): SizeToken {

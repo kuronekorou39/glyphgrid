@@ -1,12 +1,12 @@
 {
-  "version": 1,
+  "version": 2,
   "name": "03-fan-in",
   "canvas": {"cols": 12, "rows": 12},
   "nodes": [
-    {"id": "i1", "kind": "ring", "x": 2, "y": 2, "size": "m"},
-    {"id": "i2", "kind": "dot", "x": 2, "y": 6, "size": "m"},
-    {"id": "i3", "kind": "ring", "x": 2, "y": 10, "size": "m"},
-    {"id": "out", "kind": "dot", "x": 10, "y": 6, "size": "m"}
+    {"id": "i1", "shape": "circle", "fill": "outline", "x": 2, "y": 2, "size": "m"},
+    {"id": "i2", "shape": "circle", "fill": "solid", "x": 2, "y": 6, "size": "m"},
+    {"id": "i3", "shape": "circle", "fill": "outline", "x": 2, "y": 10, "size": "m"},
+    {"id": "out", "shape": "circle", "fill": "solid", "x": 10, "y": 6, "size": "m"}
   ],
   "edges": [
     {"id": "e1", "from": "i1", "to": "out", "route": {"type": "straight"}},

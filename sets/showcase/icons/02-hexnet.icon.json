@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "name": "02-hexnet",
+  "canvas": {"cols": 12, "rows": 12},
+  "nodes": [
+    {"id": "hub", "shape": "hexagon", "fill": "solid", "x": 6, "y": 6, "size": "m"},
+    {"id": "h1", "shape": "hexagon", "fill": "outline", "x": 6, "y": 2, "size": "s"},
+    {"id": "h2", "shape": "hexagon", "fill": "outline", "x": 9.5, "y": 4, "size": "s"},
+    {"id": "h3", "shape": "hexagon", "fill": "outline", "x": 9.5, "y": 8, "size": "s"},
+    {"id": "h4", "shape": "hexagon", "fill": "outline", "x": 6, "y": 10, "size": "s"},
+    {"id": "h5", "shape": "hexagon", "fill": "outline", "x": 2.5, "y": 8, "size": "s"},
+    {"id": "h6", "shape": "hexagon", "fill": "outline", "x": 2.5, "y": 4, "size": "s"}
+  ],
+  "edges": [
+    {"id": "e1", "from": "hub", "to": "h1", "route": {"type": "straight"}},
+    {"id": "e2", "from": "hub", "to": "h2", "route": {"type": "straight"}},
+    {"id": "e3", "from": "hub", "to": "h3", "route": {"type": "straight"}},
+    {"id": "e4", "from": "hub", "to": "h4", "route": {"type": "straight"}},
+    {"id": "e5", "from": "hub", "to": "h5", "route": {"type": "straight"}},
+    {"id": "e6", "from": "hub", "to": "h6", "route": {"type": "straight"}},
+    {"id": "e7", "from": "h1", "to": "h2", "route": {"type": "straight"}, "dash": "dotted"},
+    {"id": "e8", "from": "h2", "to": "h3", "route": {"type": "straight"}, "dash": "dotted"},
+    {"id": "e9", "from": "h3", "to": "h4", "route": {"type": "straight"}, "dash": "dotted"},
+    {"id": "e10", "from": "h4", "to": "h5", "route": {"type": "straight"}, "dash": "dotted"},
+    {"id": "e11", "from": "h5", "to": "h6", "route": {"type": "straight"}, "dash": "dotted"},
+    {"id": "e12", "from": "h6", "to": "h1", "route": {"type": "straight"}, "dash": "dotted"}
+  ]
+}

@@ -7,9 +7,11 @@ import { clone, snap } from "./util.js";
 /** これ以内の距離にある幹(mid)は同じ幹とみなしてまとめる */
 const TRUNK_MERGE_DISTANCE = 1;
 
+/** 同じ形に描かれるエッジは同じキーになる。矢印なしの直線だけは向きを区別しない */
 function edgeKey(e: IconEdge): string {
-  if (e.route.type === "straight") return [e.from, e.to].sort().join("|");
-  return `${e.from}|${e.to}|${JSON.stringify(e.route)}`;
+  const look = `${e.dash ?? "solid"}|${e.arrow ?? "none"}`;
+  if (e.route.type === "straight" && !e.arrow) return `${[e.from, e.to].sort().join("|")}|${look}`;
+  return `${e.from}|${e.to}|${JSON.stringify(e.route)}|${look}`;
 }
 
 /** 自己ループと、同じ形の重複エッジを取り除く(先に出たものを残す) */

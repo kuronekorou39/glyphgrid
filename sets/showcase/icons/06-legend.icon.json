@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "name": "06-legend",
+  "canvas": {"cols": 12, "rows": 12},
+  "nodes": [
+    {"id": "hex", "shape": "hexagon", "fill": "outline", "x": 2, "y": 6, "size": "s"},
+    {"id": "dia", "shape": "diamond", "fill": "solid", "x": 6, "y": 6, "size": "s"},
+    {"id": "tri", "shape": "triangle", "fill": "outline", "x": 10, "y": 6, "size": "s"},
+    {"id": "top", "shape": "square", "fill": "core", "x": 6, "y": 2, "size": "m"},
+    {"id": "bottom", "shape": "circle", "fill": "core", "x": 6, "y": 10, "size": "m"}
+  ],
+  "edges": [
+    {"id": "e1", "from": "hex", "to": "dia", "route": {"type": "straight"}, "dash": "dotted", "arrow": "end"},
+    {"id": "e2", "from": "dia", "to": "tri", "route": {"type": "straight"}, "dash": "dashed", "arrow": "end"},
+    {"id": "e3", "from": "top", "to": "dia", "route": {"type": "straight"}, "arrow": "start"},
+    {"id": "e4", "from": "dia", "to": "bottom", "route": {"type": "straight"}}
+  ]
+}

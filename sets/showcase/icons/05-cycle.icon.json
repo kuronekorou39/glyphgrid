@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "name": "05-cycle",
+  "canvas": {"cols": 12, "rows": 12},
+  "nodes": [
+    {"id": "a", "shape": "circle", "fill": "solid", "x": 6, "y": 3, "size": "m"},
+    {"id": "b", "shape": "square", "fill": "outline", "x": 9.5, "y": 9, "size": "m"},
+    {"id": "c", "shape": "hexagon", "fill": "core", "x": 2.5, "y": 9, "size": "m"}
+  ],
+  "edges": [
+    {"id": "e1", "from": "a", "to": "b", "route": {"type": "straight"}, "arrow": "end"},
+    {"id": "e2", "from": "b", "to": "c", "route": {"type": "straight"}, "arrow": "both"},
+    {"id": "e3", "from": "c", "to": "a", "route": {"type": "straight"}, "arrow": "end"}
+  ]
+}

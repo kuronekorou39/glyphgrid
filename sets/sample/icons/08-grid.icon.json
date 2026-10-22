@@ -1,17 +1,17 @@
 {
-  "version": 1,
+  "version": 2,
   "name": "08-grid",
   "canvas": {"cols": 12, "rows": 12},
   "nodes": [
-    {"id": "tl", "kind": "dot", "x": 2, "y": 2, "size": "m"},
-    {"id": "t", "kind": "square", "x": 6, "y": 2, "size": "m"},
-    {"id": "tr", "kind": "dot", "x": 10, "y": 2, "size": "m"},
-    {"id": "l", "kind": "square", "x": 2, "y": 6, "size": "m"},
-    {"id": "c", "kind": "dot", "x": 6, "y": 6, "size": "m"},
-    {"id": "r", "kind": "square", "x": 10, "y": 6, "size": "m"},
-    {"id": "bl", "kind": "dot", "x": 2, "y": 10, "size": "m"},
-    {"id": "b", "kind": "square", "x": 6, "y": 10, "size": "m"},
-    {"id": "br", "kind": "dot", "x": 10, "y": 10, "size": "m"}
+    {"id": "tl", "shape": "circle", "fill": "solid", "x": 2, "y": 2, "size": "m"},
+    {"id": "t", "shape": "square", "fill": "outline", "x": 6, "y": 2, "size": "m"},
+    {"id": "tr", "shape": "circle", "fill": "solid", "x": 10, "y": 2, "size": "m"},
+    {"id": "l", "shape": "square", "fill": "outline", "x": 2, "y": 6, "size": "m"},
+    {"id": "c", "shape": "circle", "fill": "solid", "x": 6, "y": 6, "size": "m"},
+    {"id": "r", "shape": "square", "fill": "outline", "x": 10, "y": 6, "size": "m"},
+    {"id": "bl", "shape": "circle", "fill": "solid", "x": 2, "y": 10, "size": "m"},
+    {"id": "b", "shape": "square", "fill": "outline", "x": 6, "y": 10, "size": "m"},
+    {"id": "br", "shape": "circle", "fill": "solid", "x": 10, "y": 10, "size": "m"}
   ],
   "edges": [
     {"id": "e1", "from": "tl", "to": "t", "route": {"type": "straight"}},

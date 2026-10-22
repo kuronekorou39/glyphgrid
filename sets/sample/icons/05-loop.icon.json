@@ -1,12 +1,12 @@
 {
-  "version": 1,
+  "version": 2,
   "name": "05-loop",
   "canvas": {"cols": 12, "rows": 12},
   "nodes": [
-    {"id": "start", "kind": "ring", "x": 2, "y": 6, "size": "m"},
-    {"id": "top", "kind": "square", "x": 6, "y": 2, "size": "m"},
-    {"id": "right", "kind": "square", "x": 10, "y": 6, "size": "m"},
-    {"id": "bottom", "kind": "square", "x": 6, "y": 10, "size": "m"}
+    {"id": "start", "shape": "circle", "fill": "outline", "x": 2, "y": 6, "size": "m"},
+    {"id": "top", "shape": "square", "fill": "outline", "x": 6, "y": 2, "size": "m"},
+    {"id": "right", "shape": "square", "fill": "outline", "x": 10, "y": 6, "size": "m"},
+    {"id": "bottom", "shape": "square", "fill": "outline", "x": 6, "y": 10, "size": "m"}
   ],
   "edges": [
     {"id": "e1", "from": "start", "to": "top", "route": {"type": "ortho", "bend": "vh"}},

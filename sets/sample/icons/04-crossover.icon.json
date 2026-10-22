@@ -1,14 +1,14 @@
 {
-  "version": 1,
+  "version": 2,
   "name": "04-crossover",
   "canvas": {"cols": 12, "rows": 12},
   "nodes": [
-    {"id": "l1", "kind": "dot", "x": 2, "y": 3, "size": "m"},
-    {"id": "l2", "kind": "dot", "x": 2, "y": 6, "size": "m"},
-    {"id": "l3", "kind": "ring", "x": 2, "y": 9, "size": "m"},
-    {"id": "r1", "kind": "dot", "x": 10, "y": 3, "size": "m"},
-    {"id": "r2", "kind": "ring", "x": 10, "y": 6, "size": "m"},
-    {"id": "r3", "kind": "dot", "x": 10, "y": 9, "size": "m"}
+    {"id": "l1", "shape": "circle", "fill": "solid", "x": 2, "y": 3, "size": "m"},
+    {"id": "l2", "shape": "circle", "fill": "solid", "x": 2, "y": 6, "size": "m"},
+    {"id": "l3", "shape": "circle", "fill": "outline", "x": 2, "y": 9, "size": "m"},
+    {"id": "r1", "shape": "circle", "fill": "solid", "x": 10, "y": 3, "size": "m"},
+    {"id": "r2", "shape": "circle", "fill": "outline", "x": 10, "y": 6, "size": "m"},
+    {"id": "r3", "shape": "circle", "fill": "solid", "x": 10, "y": 9, "size": "m"}
   ],
   "edges": [
     {"id": "e1", "from": "l1", "to": "r2", "route": {"type": "slant", "bend": "hdh", "mid": 6, "span": 2}},

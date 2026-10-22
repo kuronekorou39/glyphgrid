@@ -3,30 +3,30 @@
 exports[`renderSvg > エッジが先、ノードが後。viewBox 付き 1`] = `
 "<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 288" width="288" height="288">
 <g fill="none" stroke="#222222" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round">
-<path d="M68.4 144L126 144A18 18 0 0 0 144 126L144 66A18 18 0 0 1 162 48L220.8 48"/>
+<path d="M68.4 144L126 144A18 18 0 0 0 144 126L144 66A18 18 0 0 1 162 48L219.6 48"/>
 <path d="M68.4 144L126 144A18 18 0 0 1 144 162L144 222A18 18 0 0 0 162 240L222 240"/>
 <circle cx="48" cy="144" r="24" fill="#222222" stroke="none"/>
-<circle cx="240" cy="48" r="19.2"/>
+<circle cx="240" cy="48" r="20.4"/>
 <rect x="222" y="222" width="36" height="36" rx="2.88"/>
 </g>
 </svg>
 "
 `;
 
-exports[`サンプルセット sets/sample > 01-flow-z.icon.json 1`] = `
+exports[`セット sets/sample > 01-flow-z.icon.json 1`] = `
 "<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 288" width="288" height="288">
 <g fill="none" stroke="#222222" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M68.4 48L126 48"/>
-<path d="M162 48L220.8 48"/>
-<path d="M226.424 61.576L157.576 130.424"/>
-<path d="M130.424 157.576L61.576 226.424"/>
-<path d="M67.2 240L126 240"/>
+<path d="M162 48L219.6 48"/>
+<path d="M225.575 62.425L158.425 129.575"/>
+<path d="M129.575 158.425L62.425 225.575"/>
+<path d="M68.4 240L126 240"/>
 <path d="M162 240L219.6 240"/>
 <circle cx="48" cy="48" r="24" fill="#222222" stroke="none"/>
 <rect x="126" y="30" width="36" height="36" rx="2.88"/>
-<circle cx="240" cy="48" r="19.2"/>
-<circle cx="144" cy="144" r="19.2"/>
-<circle cx="48" cy="240" r="19.2"/>
+<circle cx="240" cy="48" r="20.4"/>
+<circle cx="144" cy="144" r="20.4"/>
+<circle cx="48" cy="240" r="20.4"/>
 <rect x="126" y="222" width="36" height="36" rx="2.88"/>
 <circle cx="240" cy="240" r="24" fill="#222222" stroke="none"/>
 </g>
@@ -34,7 +34,7 @@ exports[`サンプルセット sets/sample > 01-flow-z.icon.json 1`] = `
 "
 `;
 
-exports[`サンプルセット sets/sample > 02-branch.icon.json 1`] = `
+exports[`セット sets/sample > 02-branch.icon.json 1`] = `
 "<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 288" width="288" height="288">
 <g fill="none" stroke="#222222" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M68.4 144L126 144A18 18 0 0 0 144 126L144 66A18 18 0 0 1 162 48L219.6 48"/>
@@ -49,47 +49,47 @@ exports[`サンプルセット sets/sample > 02-branch.icon.json 1`] = `
 "
 `;
 
-exports[`サンプルセット sets/sample > 03-fan-in.icon.json 1`] = `
+exports[`セット sets/sample > 03-fan-in.icon.json 1`] = `
 "<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 288" width="288" height="288">
 <g fill="none" stroke="#222222" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round">
-<path d="M65.173 56.586L221.754 134.877"/>
+<path d="M66.246 57.123L221.754 134.877"/>
 <path d="M68.4 144L219.6 144"/>
-<path d="M65.173 231.414L221.754 153.123"/>
-<circle cx="48" cy="48" r="19.2"/>
+<path d="M66.246 230.877L221.754 153.123"/>
+<circle cx="48" cy="48" r="20.4"/>
 <circle cx="48" cy="144" r="24" fill="#222222" stroke="none"/>
-<circle cx="48" cy="240" r="19.2"/>
+<circle cx="48" cy="240" r="20.4"/>
 <circle cx="240" cy="144" r="24" fill="#222222" stroke="none"/>
 </g>
 </svg>
 "
 `;
 
-exports[`サンプルセット sets/sample > 04-crossover.icon.json 1`] = `
+exports[`セット sets/sample > 04-crossover.icon.json 1`] = `
 "<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 288" width="288" height="288">
 <g fill="none" stroke="#222222" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round">
-<path d="M68.4 72L110.367 72A18 18 0 0 1 125.344 80.015L162.656 135.985A18 18 0 0 0 177.633 144L220.8 144"/>
+<path d="M68.4 72L110.367 72A18 18 0 0 1 125.344 80.015L162.656 135.985A18 18 0 0 0 177.633 144L219.6 144"/>
 <path d="M68.4 144L110.367 144A18 18 0 0 0 125.344 135.985L162.656 80.015A18 18 0 0 1 177.633 72L219.6 72"/>
-<path d="M67.2 216L219.6 216"/>
-<path d="M67.2 216L110.367 216A18 18 0 0 0 125.344 207.985L162.656 152.015A18 18 0 0 1 177.633 144L220.8 144"/>
+<path d="M68.4 216L219.6 216"/>
+<path d="M68.4 216L110.367 216A18 18 0 0 0 125.344 207.985L162.656 152.015A18 18 0 0 1 177.633 144L219.6 144"/>
 <circle cx="48" cy="72" r="24" fill="#222222" stroke="none"/>
 <circle cx="48" cy="144" r="24" fill="#222222" stroke="none"/>
-<circle cx="48" cy="216" r="19.2"/>
+<circle cx="48" cy="216" r="20.4"/>
 <circle cx="240" cy="72" r="24" fill="#222222" stroke="none"/>
-<circle cx="240" cy="144" r="19.2"/>
+<circle cx="240" cy="144" r="20.4"/>
 <circle cx="240" cy="216" r="24" fill="#222222" stroke="none"/>
 </g>
 </svg>
 "
 `;
 
-exports[`サンプルセット sets/sample > 05-loop.icon.json 1`] = `
+exports[`セット sets/sample > 05-loop.icon.json 1`] = `
 "<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 288" width="288" height="288">
 <g fill="none" stroke="#222222" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round">
-<path d="M48 124.8L48 66A18 18 0 0 1 66 48L126 48"/>
+<path d="M48 123.6L48 66A18 18 0 0 1 66 48L126 48"/>
 <path d="M162 48L222 48A18 18 0 0 1 240 66L240 126"/>
 <path d="M240 162L240 222A18 18 0 0 1 222 240L162 240"/>
-<path d="M126 240L66 240A18 18 0 0 1 48 222L48 163.2"/>
-<circle cx="48" cy="144" r="19.2"/>
+<path d="M126 240L66 240A18 18 0 0 1 48 222L48 164.4"/>
+<circle cx="48" cy="144" r="20.4"/>
 <rect x="126" y="30" width="36" height="36" rx="2.88"/>
 <rect x="222" y="126" width="36" height="36" rx="2.88"/>
 <rect x="126" y="222" width="36" height="36" rx="2.88"/>
@@ -98,7 +98,7 @@ exports[`サンプルセット sets/sample > 05-loop.icon.json 1`] = `
 "
 `;
 
-exports[`サンプルセット sets/sample > 06-network.icon.json 1`] = `
+exports[`セット sets/sample > 06-network.icon.json 1`] = `
 "<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 288" width="288" height="288">
 <g fill="none" stroke="#222222" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M60 48L132 48"/>
@@ -133,20 +133,20 @@ exports[`サンプルセット sets/sample > 06-network.icon.json 1`] = `
 "
 `;
 
-exports[`サンプルセット sets/sample > 07-hierarchy.icon.json 1`] = `
+exports[`セット sets/sample > 07-hierarchy.icon.json 1`] = `
 "<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 288" width="288" height="288">
 <g fill="none" stroke="#222222" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M144 68.4L144 78A18 18 0 0 1 126 96L90 96A18 18 0 0 0 72 114L72 123.6"/>
 <path d="M144 68.4L144 78A18 18 0 0 0 162 96L198 96A18 18 0 0 1 216 114L216 126"/>
-<path d="M72 164.4L72 180A12 12 0 0 1 60 192A12 12 0 0 0 48 204L48 220.8"/>
-<path d="M72 164.4L72 174A18 18 0 0 0 90 192A18 18 0 0 1 108 210L108 220.8"/>
+<path d="M72 164.4L72 180A12 12 0 0 1 60 192A12 12 0 0 0 48 204L48 219.6"/>
+<path d="M72 164.4L72 174A18 18 0 0 0 90 192A18 18 0 0 1 108 210L108 219.6"/>
 <path d="M216 162L216 174A18 18 0 0 1 198 192A18 18 0 0 0 180 210L180 219.6"/>
 <path d="M216 162L216 180A12 12 0 0 0 228 192A12 12 0 0 1 240 204L240 219.6"/>
 <circle cx="144" cy="48" r="24" fill="#222222" stroke="none"/>
 <circle cx="72" cy="144" r="24" fill="#222222" stroke="none"/>
 <rect x="198" y="126" width="36" height="36" rx="2.88"/>
-<circle cx="48" cy="240" r="19.2"/>
-<circle cx="108" cy="240" r="19.2"/>
+<circle cx="48" cy="240" r="20.4"/>
+<circle cx="108" cy="240" r="20.4"/>
 <circle cx="180" cy="240" r="24" fill="#222222" stroke="none"/>
 <circle cx="240" cy="240" r="24" fill="#222222" stroke="none"/>
 </g>
@@ -154,7 +154,7 @@ exports[`サンプルセット sets/sample > 07-hierarchy.icon.json 1`] = `
 "
 `;
 
-exports[`サンプルセット sets/sample > 08-grid.icon.json 1`] = `
+exports[`セット sets/sample > 08-grid.icon.json 1`] = `
 "<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 288" width="288" height="288">
 <g fill="none" stroke="#222222" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M68.4 48L126 48"/>
@@ -183,7 +183,7 @@ exports[`サンプルセット sets/sample > 08-grid.icon.json 1`] = `
 "
 `;
 
-exports[`サンプルセット sets/sample > 09-hub.icon.json 1`] = `
+exports[`セット sets/sample > 09-hub.icon.json 1`] = `
 "<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 288" width="288" height="288">
 <g fill="none" stroke="#222222" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round">
 <path d="M144 114L144 60"/>
@@ -203,6 +203,128 @@ exports[`サンプルセット sets/sample > 09-hub.icon.json 1`] = `
 <circle cx="72" cy="216" r="12"/>
 <circle cx="48" cy="144" r="12"/>
 <circle cx="72" cy="72" r="12"/>
+</g>
+</svg>
+"
+`;
+
+exports[`セット sets/showcase > 01-decision.icon.json 1`] = `
+"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 288" width="288" height="288">
+<g fill="none" stroke="#222222" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M68.4 144L104.315 144"/>
+<path d="M90.553 134.364L104.315 144L90.553 153.636"/>
+<path d="M144 117.891L144 66A18 18 0 0 1 162 48L212.4 48"/>
+<path d="M198.638 38.364L212.4 48L198.638 57.636"/>
+<path d="M144 170.109L144 222A18 18 0 0 0 162 240L212.4 240" stroke-dasharray="14.4 13.2"/>
+<path d="M198.638 230.364L212.4 240L198.638 249.636"/>
+<circle cx="48" cy="144" r="24" fill="#222222" stroke="none"/>
+<path d="M144 117.891L170.109 144L144 170.109L117.891 144Z"/>
+<rect x="222" y="30" width="36" height="36" rx="2.88"/>
+<rect x="222" y="222" width="36" height="36" rx="2.88"/>
+</g>
+</svg>
+"
+`;
+
+exports[`セット sets/showcase > 02-hexnet.icon.json 1`] = `
+"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 288" width="288" height="288">
+<g fill="none" stroke="#222222" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M144 121.757L144 61.843"/>
+<path d="M163.263 132.993L216.012 102.851"/>
+<path d="M163.263 155.007L216.012 185.149"/>
+<path d="M144 166.243L144 226.157"/>
+<path d="M124.737 155.007L71.988 185.149"/>
+<path d="M124.737 132.993L71.988 102.851"/>
+<path d="M155.988 54.851L216.012 89.149" stroke-dasharray="0 14.4"/>
+<path d="M228 109.843L228 178.157" stroke-dasharray="0 14.4"/>
+<path d="M216.012 198.851L155.988 233.149" stroke-dasharray="0 14.4"/>
+<path d="M132.012 233.149L71.988 198.851" stroke-dasharray="0 14.4"/>
+<path d="M60 178.157L60 109.843" stroke-dasharray="0 14.4"/>
+<path d="M71.988 89.149L132.012 54.851" stroke-dasharray="0 14.4"/>
+<path d="M144 121.757L163.263 132.878L163.263 155.122L144 166.243L124.737 155.122L124.737 132.878Z" fill="#222222"/>
+<path d="M144 34.157L155.988 41.078L155.988 54.922L144 61.843L132.012 54.922L132.012 41.078Z"/>
+<path d="M228 82.157L239.988 89.078L239.988 102.922L228 109.843L216.012 102.922L216.012 89.078Z"/>
+<path d="M228 178.157L239.988 185.078L239.988 198.922L228 205.843L216.012 198.922L216.012 185.078Z"/>
+<path d="M144 226.157L155.988 233.078L155.988 246.922L144 253.843L132.012 246.922L132.012 233.078Z"/>
+<path d="M60 178.157L71.988 185.078L71.988 198.922L60 205.843L48.012 198.922L48.012 185.078Z"/>
+<path d="M60 82.157L71.988 89.078L71.988 102.922L60 109.843L48.012 102.922L48.012 89.078Z"/>
+</g>
+</svg>
+"
+`;
+
+exports[`セット sets/showcase > 03-pipeline.icon.json 1`] = `
+"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 288" width="288" height="288">
+<g fill="none" stroke="#222222" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M80.4 180L116.4 180"/>
+<path d="M102.638 170.364L116.4 180L102.638 189.636"/>
+<path d="M162 180L208.081 180"/>
+<path d="M194.32 170.364L208.081 180L194.32 189.636"/>
+<path d="M228 164.7L228 102A18 18 0 0 0 210 84L78 84A18 18 0 0 0 60 102L60 150" stroke-dasharray="14.4 13.2"/>
+<path d="M69.636 136.238L60 150L50.364 136.238"/>
+<circle cx="60" cy="180" r="20.4"/>
+<circle cx="60" cy="180" r="9.6" fill="#222222" stroke="none"/>
+<rect x="126" y="162" width="36" height="36" rx="2.88"/>
+<path d="M228 164.7L247.745 198.9L208.255 198.9Z" fill="#222222"/>
+</g>
+</svg>
+"
+`;
+
+exports[`セット sets/showcase > 04-tree.icon.json 1`] = `
+"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 288" width="288" height="288">
+<g fill="none" stroke="#222222" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M144 90.9L144 114A18 18 0 0 1 126 132L78 132A18 18 0 0 0 60 150L60 164.315"/>
+<path d="M69.636 150.553L60 164.315L50.364 150.553"/>
+<path d="M144 90.9L144 170.672"/>
+<path d="M153.636 156.91L144 170.672L134.364 156.91"/>
+<path d="M144 90.9L144 114A18 18 0 0 0 162 132L210 132A18 18 0 0 1 228 150L228 176.4"/>
+<path d="M237.636 162.638L228 176.4L218.364 162.638"/>
+<path d="M144 56.7L163.745 90.9L124.255 90.9Z" fill="#222222"/>
+<path d="M60 177.891L86.109 204L60 230.109L33.891 204Z"/>
+<path d="M144 181.757L163.263 192.878L163.263 215.122L144 226.243L124.737 215.122L124.737 192.878Z"/>
+<path d="M144 197.597L149.545 200.798L149.545 207.202L144 210.403L138.455 207.202L138.455 200.798Z" fill="#222222"/>
+<rect x="210" y="186" width="36" height="36" rx="2.88" fill="#222222"/>
+</g>
+</svg>
+"
+`;
+
+exports[`セット sets/showcase > 05-cycle.icon.json 1`] = `
+"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 288" width="288" height="288">
+<g fill="none" stroke="#222222" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M154.279 89.621L211.9 188.4"/>
+<path d="M213.289 171.658L211.9 188.4L196.642 181.368"/>
+<path d="M200.4 216L88.863 216"/>
+<path d="M102.625 225.636L88.863 216L102.625 206.364M186.638 206.364L200.4 216L186.638 225.636"/>
+<path d="M69.706 199.361L128.884 97.913"/>
+<path d="M113.626 104.945L128.884 97.913L130.273 114.656"/>
+<circle cx="144" cy="72" r="24" fill="#222222" stroke="none"/>
+<rect x="210" y="198" width="36" height="36" rx="2.88"/>
+<path d="M60 193.757L79.263 204.878L79.263 227.122L60 238.243L40.737 227.122L40.737 204.878Z"/>
+<path d="M60 209.597L65.545 212.798L65.545 219.202L60 222.403L54.455 219.202L54.455 212.798Z" fill="#222222"/>
+</g>
+</svg>
+"
+`;
+
+exports[`セット sets/showcase > 06-legend.icon.json 1`] = `
+"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 288" width="288" height="288">
+<g fill="none" stroke="#222222" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M59.988 144L115.115 144" stroke-dasharray="0 14.4"/>
+<path d="M101.353 134.364L115.115 144L101.353 153.636"/>
+<path d="M159.309 144L224.238 144" stroke-dasharray="14.4 13.2"/>
+<path d="M210.477 134.364L224.238 144L210.477 153.636"/>
+<path d="M144 75.6L144 128.691"/>
+<path d="M134.364 89.362L144 75.6L153.636 89.362"/>
+<path d="M144 159.309L144 219.6"/>
+<path d="M48 130.157L59.988 137.078L59.988 150.922L48 157.843L36.012 150.922L36.012 137.078Z"/>
+<path d="M144 128.691L159.309 144L144 159.309L128.691 144Z" fill="#222222"/>
+<path d="M240 135.9L251.432 155.7L228.568 155.7Z"/>
+<rect x="126" y="30" width="36" height="36" rx="2.88"/>
+<rect x="138.96" y="42.96" width="10.08" height="10.08" rx="2.88" fill="#222222"/>
+<circle cx="144" cy="240" r="20.4"/>
+<circle cx="144" cy="240" r="9.6" fill="#222222" stroke="none"/>
 </g>
 </svg>
 "

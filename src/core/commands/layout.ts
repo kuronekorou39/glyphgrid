@@ -1,6 +1,7 @@
 import { routePoints } from "../geometry.js";
 import { EPS, allIds, findNode, nextId, requireNode, type IconDoc, type Route, type SizeToken } from "../model.js";
-import { nodeHalfExtent, type Style } from "../style.js";
+import { nodeBounds } from "../shape.js";
+import type { Style } from "../style.js";
 import type { Command } from "./types.js";
 import { clone, idList, midAxis, oneOf, optNum, pickNodes, shiftMids, size, snap } from "./util.js";
 
@@ -140,8 +141,8 @@ export function contentBounds(doc: IconDoc, style: Style) {
     maxY = Math.max(maxY, y1);
   };
   for (const n of doc.nodes) {
-    const h = nodeHalfExtent(style, n);
-    add(n.x - h, n.y - h, n.x + h, n.y + h);
+    const nb = nodeBounds(style, n);
+    add(nb.minX, nb.minY, nb.maxX, nb.maxY);
   }
   const w = style.stroke.width / 2;
   for (const e of doc.edges) {

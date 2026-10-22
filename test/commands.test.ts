@@ -13,8 +13,8 @@ describe("addNode / removeNode", () => {
   it("既定サイズ m で追加し、id を自動採番する", () => {
     const doc = build([{ op: "addNode", kind: "dot", x: 1, y: 2 }, { op: "addNode", kind: "ring", x: 3, y: 4, size: "s" }]);
     expect(doc.nodes).toEqual([
-      { id: "n1", kind: "dot", x: 1, y: 2, size: "m" },
-      { id: "n2", kind: "ring", x: 3, y: 4, size: "s" },
+      { id: "n1", shape: "circle", fill: "solid", x: 1, y: 2, size: "m" },
+      { id: "n2", shape: "circle", fill: "outline", x: 3, y: 4, size: "s" },
     ]);
   });
 
@@ -57,7 +57,7 @@ describe("moveNode / nudge / setKind / setSize", () => {
 
   it("setKind / setSize", () => {
     const doc = build([...three, { op: "setKind", ids: ["a", "b"], kind: "square" }, { op: "setSize", ids: ["c"], size: "l" }]);
-    expect(doc.nodes.map((n) => `${n.kind}:${n.size}`)).toEqual(["square:m", "square:m", "square:l"]);
+    expect(doc.nodes.map((n) => `${n.shape}/${n.fill}:${n.size}`)).toEqual(["square/outline:m", "square/outline:m", "square/outline:l"]);
   });
 
   it("存在しない id はエラー", () => {
@@ -303,7 +303,7 @@ describe("applyOps", () => {
 
 describe("argsFromCli", () => {
   it("位置引数と key=value を割り当てる", () => {
-    expect(argsFromCli("addNode", ["dot", "2", "3", "id=hub"])).toEqual({ kind: "dot", x: "2", y: "3", id: "hub" });
+    expect(argsFromCli("addNode", ["dot", "2", "3", "id=hub"])).toEqual({ shape: "dot", x: "2", y: "3", id: "hub" });
   });
 
   it("必須引数が足りなければエラー", () => {

@@ -1,17 +1,17 @@
 {
-  "version": 1,
+  "version": 2,
   "name": "09-hub",
   "canvas": {"cols": 12, "rows": 12},
   "nodes": [
-    {"id": "hub", "kind": "dot", "x": 6, "y": 6, "size": "l"},
-    {"id": "s1", "kind": "ring", "x": 6, "y": 2, "size": "s"},
-    {"id": "s2", "kind": "ring", "x": 9, "y": 3, "size": "s"},
-    {"id": "s3", "kind": "ring", "x": 10, "y": 6, "size": "s"},
-    {"id": "s4", "kind": "ring", "x": 9, "y": 9, "size": "s"},
-    {"id": "s5", "kind": "ring", "x": 6, "y": 10, "size": "s"},
-    {"id": "s6", "kind": "ring", "x": 3, "y": 9, "size": "s"},
-    {"id": "s7", "kind": "ring", "x": 2, "y": 6, "size": "s"},
-    {"id": "s8", "kind": "ring", "x": 3, "y": 3, "size": "s"}
+    {"id": "hub", "shape": "circle", "fill": "solid", "x": 6, "y": 6, "size": "l"},
+    {"id": "s1", "shape": "circle", "fill": "outline", "x": 6, "y": 2, "size": "s"},
+    {"id": "s2", "shape": "circle", "fill": "outline", "x": 9, "y": 3, "size": "s"},
+    {"id": "s3", "shape": "circle", "fill": "outline", "x": 10, "y": 6, "size": "s"},
+    {"id": "s4", "shape": "circle", "fill": "outline", "x": 9, "y": 9, "size": "s"},
+    {"id": "s5", "shape": "circle", "fill": "outline", "x": 6, "y": 10, "size": "s"},
+    {"id": "s6", "shape": "circle", "fill": "outline", "x": 3, "y": 9, "size": "s"},
+    {"id": "s7", "shape": "circle", "fill": "outline", "x": 2, "y": 6, "size": "s"},
+    {"id": "s8", "shape": "circle", "fill": "outline", "x": 3, "y": 3, "size": "s"}
   ],
   "edges": [
     {"id": "e1", "from": "hub", "to": "s1", "route": {"type": "straight"}},

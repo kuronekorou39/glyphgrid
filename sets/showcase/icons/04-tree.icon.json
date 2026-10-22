@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "name": "04-tree",
+  "canvas": {"cols": 12, "rows": 12},
+  "nodes": [
+    {"id": "root", "shape": "triangle", "fill": "solid", "x": 6, "y": 3, "size": "m"},
+    {"id": "a", "shape": "diamond", "fill": "outline", "x": 2.5, "y": 8.5, "size": "m"},
+    {"id": "b", "shape": "hexagon", "fill": "core", "x": 6, "y": 8.5, "size": "m"},
+    {"id": "c", "shape": "square", "fill": "solid", "x": 9.5, "y": 8.5, "size": "m"}
+  ],
+  "edges": [
+    {"id": "e1", "from": "root", "to": "a", "route": {"type": "ortho", "bend": "vhv", "mid": 5.5}, "arrow": "end"},
+    {"id": "e2", "from": "root", "to": "b", "route": {"type": "ortho", "bend": "vhv", "mid": 5.5}, "arrow": "end"},
+    {"id": "e3", "from": "root", "to": "c", "route": {"type": "ortho", "bend": "vhv", "mid": 5.5}, "arrow": "end"}
+  ]
+}

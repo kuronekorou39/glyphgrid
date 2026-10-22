@@ -16,7 +16,8 @@ import {
 import { api, onFileChange, type SetInfo } from "./api.js";
 import { Canvas } from "./Canvas.js";
 import { Inspector, LintPanel, Sidebar, Toolbar } from "./Panels.js";
-import { TOOLS, type Tool } from "./tools.js";
+import { NODE_FILLS } from "../core/index.js";
+import { SHAPE_KEYS, type EdgeLook, type NodeLook, type Tool } from "./tools.js";
 
 /** 編集が止まってから保存するまでの待ち時間(ms) */
 const SAVE_DELAY = 300;
@@ -32,7 +33,8 @@ export function App() {
   const [history, setHistory] = useState<History | null>(null);
   const [selection, setSelection] = useState<string[]>([]);
   const [tool, setTool] = useState<Tool>("select");
-  const [route, setRoute] = useState("straight");
+  const [nodeLook, setNodeLook] = useState<NodeLook>({ shape: "circle", fill: "solid" });
+  const [edgeLook, setEdgeLook] = useState<EdgeLook>({ route: "straight", dash: "solid", arrow: "none" });
   const [status, setStatus] = useState("");
 
   const doc = history?.present ?? null;
@@ -171,9 +173,13 @@ export function App() {
   const selectedNodes = doc ? selection.filter((id) => findNode(doc, id)) : [];
   const selectedEdges = doc ? selection.filter((id) => doc.edges.some((e) => e.id === id)) : [];
 
-  const changeRoute = (r: string) => {
-    setRoute(r);
-    if (selectedEdges.length) exec({ op: "setRoute", ids: selectedEdges, route: r });
+  /** 新しいエッジの見た目を変える。エッジを選択中ならそれにも適用する */
+  const changeEdgeLook = (change: Partial<EdgeLook>) => {
+    setEdgeLook((l) => ({ ...l, ...change }));
+    if (!selectedEdges.length) return;
+    if (change.route) exec({ op: "setRoute", ids: selectedEdges, route: change.route });
+    if (change.dash) exec({ op: "setDash", ids: selectedEdges, dash: change.dash });
+    if (change.arrow) exec({ op: "setArrow", ids: selectedEdges, arrow: change.arrow });
   };
 
   const deleteSelection = () => {
@@ -214,9 +220,14 @@ export function App() {
         setSelection([]);
         setTool("select");
       } else if (!mod) {
-        const found = TOOLS.find((x) => x.key === key);
-        if (found) setTool(found.tool);
-        else return;
+        const shape = SHAPE_KEYS[key];
+        if (key === "v") setTool("select");
+        else if (key === "c") setTool("connect");
+        else if (key === "f") setNodeLook((l) => ({ ...l, fill: NODE_FILLS[(NODE_FILLS.indexOf(l.fill) + 1) % NODE_FILLS.length]! }));
+        else if (shape) {
+          setNodeLook((l) => ({ ...l, shape }));
+          setTool("node");
+        } else return;
       } else return;
       e.preventDefault();
     };
@@ -257,12 +268,15 @@ export function App() {
       />
       <Toolbar
         tool={tool}
-        route={route}
+        nodeLook={nodeLook}
+        edgeLook={edgeLook}
+        style={style}
         selectedNodes={selectedNodes}
         canUndo={!!history?.past.length}
         canRedo={!!history?.future.length}
         onTool={setTool}
-        onRoute={changeRoute}
+        onNodeLook={setNodeLook}
+        onEdgeLook={changeEdgeLook}
         onOp={exec}
         onUndo={() => setHistory((h) => (h ? undo(h) : h))}
         onRedo={() => setHistory((h) => (h ? redo(h) : h))}
@@ -275,7 +289,8 @@ export function App() {
             selection={selection}
             issues={issues}
             tool={tool}
-            route={route}
+            nodeLook={nodeLook}
+            edgeLook={edgeLook}
             onSelect={setSelection}
             onCommit={commit}
             onOp={exec}

@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { edgePolyline, formatDoc, parseDoc, parseStyle, renderSvg, roundedPath, routePoints, simplify } from "../src/core/index.js";
+import { edgePolyline, formatDoc, lint, parseDoc, parseStyle, renderSvg, roundedPath, routePoints, simplify } from "../src/core/index.js";
 import { renderSheet } from "../src/core/render/sheet.js";
 import { build, expectClose, style } from "./helpers.js";
 
@@ -41,8 +41,8 @@ describe("edgePolyline(ノード外形で切る)", () => {
       { op: "addNode", id: "b", kind: "dot", x: 10, y: 6 },
     ]);
     const pts = edgePolyline(style, { type: "straight" }, doc.nodes[0]!, doc.nodes[1]!);
-    expectClose(pts[0]!.x, 2 + style.node.ring.m / 2 - w / 2);
-    expectClose(pts[1]!.x, 10 - style.node.dot.m / 2 + w / 2);
+    expectClose(pts[0]!.x, 2 + style.node.circle.m / 2 - w / 2);
+    expectClose(pts[1]!.x, 10 - style.node.circle.m / 2 + w / 2);
   });
 
   it("四角は斜めから来ても辺で切る", () => {
@@ -111,24 +111,30 @@ describe("renderSvg", () => {
   });
 });
 
-describe("サンプルセット sets/sample", () => {
-  const dir = join(import.meta.dirname, "..", "sets", "sample");
-  const sampleStyle = parseStyle(JSON.parse(readFileSync(join(dir, "style.json"), "utf8")));
-  const files = readdirSync(join(dir, "icons")).filter((f) => f.endsWith(".icon.json")).sort();
+// 番号付きのアイコン(NN-name.icon.json)だけをテスト対象にする。作業中に足したファイルは含めない
+describe.each([
+  ["sample", 9],
+  ["showcase", 6],
+])("セット sets/%s", (set, count) => {
+  const dir = join(import.meta.dirname, "..", "sets", set);
+  const setStyle = parseStyle(JSON.parse(readFileSync(join(dir, "style.json"), "utf8")));
+  const files = readdirSync(join(dir, "icons")).filter((f) => /^\d\d-.+\.icon\.json$/.test(f)).sort();
+  const read = (f: string) => readFileSync(join(dir, "icons", f), "utf8");
 
-  it("見本の 9 アイコンがそろっている", () => {
-    expect(files).toHaveLength(9);
+  it(`${count} アイコンがそろい、lint を通る`, () => {
+    expect(files).toHaveLength(count);
+    for (const f of files) expect(lint(parseDoc(JSON.parse(read(f))), setStyle).map((i) => i.message)).toEqual([]);
   });
 
   it.each(files)("%s", (file) => {
-    const text = readFileSync(join(dir, "icons", file), "utf8");
+    const text = read(file);
     const doc = parseDoc(JSON.parse(text));
     expect(formatDoc(doc)).toBe(text.replace(/\r\n/g, "\n"));
-    expect(renderSvg(doc, sampleStyle)).toMatchSnapshot();
+    expect(renderSvg(doc, setStyle)).toMatchSnapshot();
   });
 
   it("シート", () => {
-    const docs = files.map((f) => parseDoc(JSON.parse(readFileSync(join(dir, "icons", f), "utf8"))));
-    expect(renderSheet(docs, sampleStyle)).toContain('viewBox="0 0 1056 1056"');
+    const docs = files.map((f) => parseDoc(JSON.parse(read(f))));
+    expect(renderSheet(docs, setStyle)).toMatch(/^<svg [^>]*viewBox="0 0 \d+ \d+"/);
   });
 });
