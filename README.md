@@ -9,6 +9,7 @@
 npm install
 npm run glyphgrid -- new sample/foo                       # sets/sample/icons/foo.icon.json を作る
 npm run glyphgrid -- apply sets/sample/icons/foo.icon.json ops.json
+npm run glyphgrid -- lint sets/sample                    # 問題があれば終了コード 1
 npm run glyphgrid -- export sets/sample --format png --out out
 npm run glyphgrid -- sheet sets/sample --out out/sheet.png
 npm run glyphgrid -- commands                             # コマンド一覧

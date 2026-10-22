@@ -11,6 +11,7 @@ import {
   argsFromCli,
   emptyDoc,
   formatDoc,
+  lint,
   parseDoc,
   parseStyle,
   renderSvg,
@@ -29,6 +30,7 @@ const USAGE = `glyphgrid <command> [args]
   apply <icon.json> <ops.json|->                         ops を一括適用して上書き保存
   run <icon.json> <command> [args...]                    単発コマンド(key=value でも指定可)
   tidy <icon.json>                                       整形して上書き保存
+  lint <icon.json|set-dir> [--strict] [--json]           問題があれば終了コード 1(--strict は警告でも 1)
   export <icon.json|set-dir> --format svg|png --out <dir> [--scale 1]
   sheet <set-dir> --out sheet.png|sheet.svg [--columns n] [--scale 1]
   commands                                               コマンド一覧
@@ -41,7 +43,7 @@ interface Parsed {
   flags: Record<string, string | true>;
 }
 
-const BOOLEAN_FLAGS = new Set(["dry-run", "help"]);
+const BOOLEAN_FLAGS = new Set(["dry-run", "help", "strict", "json"]);
 
 function parseArgv(argv: string[]): Parsed {
   const positional: string[] = [];
@@ -171,6 +173,28 @@ const handlers: Record<string, (p: Parsed) => void> = {
     saveDoc(p, iconPath!, applyOp(readDoc(iconPath!), loadStyle(p, iconPath!), { op: "tidy" }));
   },
 
+  lint(p) {
+    const [, target] = need(p, 2, "lint <icon.json|set-dir>");
+    const style = loadStyle(p, target!);
+    const files = listIcons(target!);
+    let failed = false;
+    const report: Record<string, ReturnType<typeof lint>> = {};
+    for (const file of files) {
+      const issues = lint(readDoc(file), style);
+      report[file] = issues;
+      if (issues.some((i) => i.severity === "error" || p.flags.strict)) failed = true;
+      if (p.flags.json) continue;
+      if (!issues.length) {
+        console.log(`OK  ${file}`);
+        continue;
+      }
+      console.log(`NG  ${file}`);
+      for (const i of issues) console.log(`    ${i.severity === "error" ? "error  " : "warning"} ${i.rule.padEnd(18)} ${i.message}`);
+    }
+    if (p.flags.json) console.log(JSON.stringify(report, null, 2));
+    if (failed) process.exitCode = 1;
+  },
+
   export(p) {
     const [, target] = need(p, 2, "export <icon.json|set-dir> --format svg|png --out <dir>");
     const format = flagStr(p, "format") ?? "svg";
@@ -221,7 +245,7 @@ function main(argv: string[]): number {
   }
   try {
     handler(p);
-    return 0;
+    return Number(process.exitCode ?? 0);
   } catch (e) {
     console.error(`エラー: ${(e as Error).message}`);
     return 1;

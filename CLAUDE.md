@@ -35,5 +35,5 @@ LLM の作業手順:`new` → ops を `apply`(最後に `tidy`)→ `lint` → `e
 
 - M1 core + CLI(完了)
 - M2 Web UI:編集、`sets/` のファイル監視、アンドゥ(スナップショット履歴)
-- M3 lint(off-grid / overlap / edge-through-node / dangling-edge / out-of-bounds / off-center / inconsistent-size)、スタイル変更時の一括再書き出し
+- M3 lint(完了。`src/core/lint/`)、スタイル変更時の一括再書き出し
 - M4 Tauri 化、MCP サーバー内蔵
