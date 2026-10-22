@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "name": "08-grid",
+  "canvas": {"cols": 12, "rows": 12},
+  "nodes": [
+    {"id": "tl", "kind": "dot", "x": 2, "y": 2, "size": "m"},
+    {"id": "t", "kind": "square", "x": 6, "y": 2, "size": "m"},
+    {"id": "tr", "kind": "dot", "x": 10, "y": 2, "size": "m"},
+    {"id": "l", "kind": "square", "x": 2, "y": 6, "size": "m"},
+    {"id": "c", "kind": "dot", "x": 6, "y": 6, "size": "m"},
+    {"id": "r", "kind": "square", "x": 10, "y": 6, "size": "m"},
+    {"id": "bl", "kind": "dot", "x": 2, "y": 10, "size": "m"},
+    {"id": "b", "kind": "square", "x": 6, "y": 10, "size": "m"},
+    {"id": "br", "kind": "dot", "x": 10, "y": 10, "size": "m"}
+  ],
+  "edges": [
+    {"id": "e1", "from": "tl", "to": "t", "route": {"type": "straight"}},
+    {"id": "e2", "from": "t", "to": "tr", "route": {"type": "straight"}},
+    {"id": "e3", "from": "l", "to": "c", "route": {"type": "straight"}},
+    {"id": "e4", "from": "c", "to": "r", "route": {"type": "straight"}},
+    {"id": "e5", "from": "bl", "to": "b", "route": {"type": "straight"}},
+    {"id": "e6", "from": "b", "to": "br", "route": {"type": "straight"}},
+    {"id": "e7", "from": "tl", "to": "l", "route": {"type": "straight"}},
+    {"id": "e8", "from": "l", "to": "bl", "route": {"type": "straight"}},
+    {"id": "e9", "from": "t", "to": "c", "route": {"type": "straight"}},
+    {"id": "e10", "from": "c", "to": "b", "route": {"type": "straight"}},
+    {"id": "e11", "from": "tr", "to": "r", "route": {"type": "straight"}},
+    {"id": "e12", "from": "r", "to": "br", "route": {"type": "straight"}}
+  ]
+}

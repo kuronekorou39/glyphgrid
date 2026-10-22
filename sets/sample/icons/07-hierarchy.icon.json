@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "name": "07-hierarchy",
+  "canvas": {"cols": 12, "rows": 12},
+  "nodes": [
+    {"id": "root", "kind": "dot", "x": 6, "y": 2, "size": "m"},
+    {"id": "c1", "kind": "dot", "x": 3, "y": 6, "size": "m"},
+    {"id": "c2", "kind": "square", "x": 9, "y": 6, "size": "m"},
+    {"id": "g1", "kind": "ring", "x": 2, "y": 10, "size": "m"},
+    {"id": "g2", "kind": "ring", "x": 4.5, "y": 10, "size": "m"},
+    {"id": "g3", "kind": "dot", "x": 7.5, "y": 10, "size": "m"},
+    {"id": "g4", "kind": "dot", "x": 10, "y": 10, "size": "m"}
+  ],
+  "edges": [
+    {"id": "e1", "from": "root", "to": "c1", "route": {"type": "ortho", "bend": "vhv", "mid": 4}},
+    {"id": "e2", "from": "root", "to": "c2", "route": {"type": "ortho", "bend": "vhv", "mid": 4}},
+    {"id": "e3", "from": "c1", "to": "g1", "route": {"type": "ortho", "bend": "vhv", "mid": 8}},
+    {"id": "e4", "from": "c1", "to": "g2", "route": {"type": "ortho", "bend": "vhv", "mid": 8}},
+    {"id": "e5", "from": "c2", "to": "g3", "route": {"type": "ortho", "bend": "vhv", "mid": 8}},
+    {"id": "e6", "from": "c2", "to": "g4", "route": {"type": "ortho", "bend": "vhv", "mid": 8}}
+  ]
+}

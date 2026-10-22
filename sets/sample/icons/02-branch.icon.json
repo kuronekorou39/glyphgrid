@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "name": "02-branch",
+  "canvas": {"cols": 12, "rows": 12},
+  "nodes": [
+    {"id": "src", "kind": "dot", "x": 2, "y": 6, "size": "m"},
+    {"id": "t1", "kind": "dot", "x": 10, "y": 2, "size": "m"},
+    {"id": "t2", "kind": "dot", "x": 10, "y": 6, "size": "m"},
+    {"id": "t3", "kind": "dot", "x": 10, "y": 10, "size": "m"}
+  ],
+  "edges": [
+    {"id": "e1", "from": "src", "to": "t1", "route": {"type": "ortho", "bend": "hvh", "mid": 6}},
+    {"id": "e2", "from": "src", "to": "t2", "route": {"type": "straight"}},
+    {"id": "e3", "from": "src", "to": "t3", "route": {"type": "ortho", "bend": "hvh", "mid": 6}}
+  ]
+}

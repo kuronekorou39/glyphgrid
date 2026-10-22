@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "name": "09-hub",
+  "canvas": {"cols": 12, "rows": 12},
+  "nodes": [
+    {"id": "hub", "kind": "dot", "x": 6, "y": 6, "size": "l"},
+    {"id": "s1", "kind": "ring", "x": 6, "y": 2, "size": "s"},
+    {"id": "s2", "kind": "ring", "x": 9, "y": 3, "size": "s"},
+    {"id": "s3", "kind": "ring", "x": 10, "y": 6, "size": "s"},
+    {"id": "s4", "kind": "ring", "x": 9, "y": 9, "size": "s"},
+    {"id": "s5", "kind": "ring", "x": 6, "y": 10, "size": "s"},
+    {"id": "s6", "kind": "ring", "x": 3, "y": 9, "size": "s"},
+    {"id": "s7", "kind": "ring", "x": 2, "y": 6, "size": "s"},
+    {"id": "s8", "kind": "ring", "x": 3, "y": 3, "size": "s"}
+  ],
+  "edges": [
+    {"id": "e1", "from": "hub", "to": "s1", "route": {"type": "straight"}},
+    {"id": "e2", "from": "hub", "to": "s2", "route": {"type": "straight"}},
+    {"id": "e3", "from": "hub", "to": "s3", "route": {"type": "straight"}},
+    {"id": "e4", "from": "hub", "to": "s4", "route": {"type": "straight"}},
+    {"id": "e5", "from": "hub", "to": "s5", "route": {"type": "straight"}},
+    {"id": "e6", "from": "hub", "to": "s6", "route": {"type": "straight"}},
+    {"id": "e7", "from": "hub", "to": "s7", "route": {"type": "straight"}},
+    {"id": "e8", "from": "hub", "to": "s8", "route": {"type": "straight"}}
+  ]
+}

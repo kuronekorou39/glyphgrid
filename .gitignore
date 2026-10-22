@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.log
+
+# 生成物
+out/
+
+# 参考資料(リポジトリには含めない)
+docs/
+CLAUDE_init.md
+Gemini_Generated_Image_*

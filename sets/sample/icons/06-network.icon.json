@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "name": "06-network",
+  "canvas": {"cols": 12, "rows": 12},
+  "nodes": [
+    {"id": "a1", "kind": "dot", "x": 2, "y": 2, "size": "s"},
+    {"id": "a2", "kind": "dot", "x": 2, "y": 6, "size": "s"},
+    {"id": "a3", "kind": "dot", "x": 2, "y": 10, "size": "s"},
+    {"id": "b1", "kind": "dot", "x": 6, "y": 2, "size": "s"},
+    {"id": "b2", "kind": "dot", "x": 6, "y": 6, "size": "s"},
+    {"id": "b3", "kind": "dot", "x": 6, "y": 10, "size": "s"},
+    {"id": "c1", "kind": "dot", "x": 10, "y": 2, "size": "s"},
+    {"id": "c2", "kind": "dot", "x": 10, "y": 6, "size": "s"},
+    {"id": "c3", "kind": "dot", "x": 10, "y": 10, "size": "s"}
+  ],
+  "edges": [
+    {"id": "e1", "from": "a1", "to": "b1", "route": {"type": "straight"}},
+    {"id": "e2", "from": "a1", "to": "b2", "route": {"type": "straight"}},
+    {"id": "e3", "from": "a1", "to": "b3", "route": {"type": "straight"}},
+    {"id": "e4", "from": "a2", "to": "b1", "route": {"type": "straight"}},
+    {"id": "e5", "from": "a2", "to": "b2", "route": {"type": "straight"}},
+    {"id": "e6", "from": "a2", "to": "b3", "route": {"type": "straight"}},
+    {"id": "e7", "from": "a3", "to": "b1", "route": {"type": "straight"}},
+    {"id": "e8", "from": "a3", "to": "b2", "route": {"type": "straight"}},
+    {"id": "e9", "from": "a3", "to": "b3", "route": {"type": "straight"}},
+    {"id": "e10", "from": "b1", "to": "c1", "route": {"type": "straight"}},
+    {"id": "e11", "from": "b1", "to": "c2", "route": {"type": "straight"}},
+    {"id": "e12", "from": "b1", "to": "c3", "route": {"type": "straight"}},
+    {"id": "e13", "from": "b2", "to": "c1", "route": {"type": "straight"}},
+    {"id": "e14", "from": "b2", "to": "c2", "route": {"type": "straight"}},
+    {"id": "e15", "from": "b2", "to": "c3", "route": {"type": "straight"}},
+    {"id": "e16", "from": "b3", "to": "c1", "route": {"type": "straight"}},
+    {"id": "e17", "from": "b3", "to": "c2", "route": {"type": "straight"}},
+    {"id": "e18", "from": "b3", "to": "c3", "route": {"type": "straight"}}
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "name": "01-flow-z",
+  "canvas": {"cols": 12, "rows": 12},
+  "nodes": [
+    {"id": "a1", "kind": "dot", "x": 2, "y": 2, "size": "m"},
+    {"id": "a2", "kind": "square", "x": 6, "y": 2, "size": "m"},
+    {"id": "a3", "kind": "ring", "x": 10, "y": 2, "size": "m"},
+    {"id": "m", "kind": "ring", "x": 6, "y": 6, "size": "m"},
+    {"id": "b1", "kind": "ring", "x": 2, "y": 10, "size": "m"},
+    {"id": "b2", "kind": "square", "x": 6, "y": 10, "size": "m"},
+    {"id": "b3", "kind": "dot", "x": 10, "y": 10, "size": "m"}
+  ],
+  "edges": [
+    {"id": "e1", "from": "a1", "to": "a2", "route": {"type": "straight"}},
+    {"id": "e2", "from": "a2", "to": "a3", "route": {"type": "straight"}},
+    {"id": "e3", "from": "a3", "to": "m", "route": {"type": "straight"}},
+    {"id": "e4", "from": "m", "to": "b1", "route": {"type": "straight"}},
+    {"id": "e5", "from": "b1", "to": "b2", "route": {"type": "straight"}},
+    {"id": "e6", "from": "b2", "to": "b3", "route": {"type": "straight"}}
+  ]
+}

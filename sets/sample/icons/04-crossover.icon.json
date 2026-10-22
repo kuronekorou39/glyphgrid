@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "name": "04-crossover",
+  "canvas": {"cols": 12, "rows": 12},
+  "nodes": [
+    {"id": "l1", "kind": "dot", "x": 2, "y": 3, "size": "m"},
+    {"id": "l2", "kind": "dot", "x": 2, "y": 6, "size": "m"},
+    {"id": "l3", "kind": "ring", "x": 2, "y": 9, "size": "m"},
+    {"id": "r1", "kind": "dot", "x": 10, "y": 3, "size": "m"},
+    {"id": "r2", "kind": "ring", "x": 10, "y": 6, "size": "m"},
+    {"id": "r3", "kind": "dot", "x": 10, "y": 9, "size": "m"}
+  ],
+  "edges": [
+    {"id": "e1", "from": "l1", "to": "r2", "route": {"type": "slant", "bend": "hdh", "mid": 6, "span": 2}},
+    {"id": "e2", "from": "l2", "to": "r1", "route": {"type": "slant", "bend": "hdh", "mid": 6, "span": 2}},
+    {"id": "e3", "from": "l3", "to": "r3", "route": {"type": "straight"}},
+    {"id": "e4", "from": "l3", "to": "r2", "route": {"type": "slant", "bend": "hdh", "mid": 6, "span": 2}}
+  ]
+}
