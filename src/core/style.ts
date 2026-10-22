@@ -25,6 +25,8 @@ export interface Style {
   dash: { dashed: [number, number]; dotted: [number, number] };
   /** 矢印。size は矢じりの辺の長さ、angle は開き角の半分(度)、gap はノードとの隙間 */
   arrow: { size: number; angle: number; gap: number };
+  /** 記号マーク(check / cross / sparkle / cursor)と線の隙間。マークは外接円で線を切るので、尖った先端と線がつながって見えないよう離す */
+  mark: { gap: number };
   background: string;
 }
 
@@ -50,6 +52,7 @@ export const DEFAULT_STYLE: Style = {
   text: { gap: 0.8, lastRatio: 0.6 },
   dash: { dashed: [0.6, 0.55], dotted: [0, 0.6] },
   arrow: { size: 0.7, angle: 35, gap: 0.25 },
+  mark: { gap: 0.35 },
   background: "transparent",
 };
 
@@ -100,6 +103,7 @@ export function parseStyle(value: unknown): Style {
     text: merge(DEFAULT_STYLE.text, v.text),
     dash: merge(DEFAULT_STYLE.dash, v.dash),
     arrow: merge(DEFAULT_STYLE.arrow, v.arrow),
+    mark: merge(DEFAULT_STYLE.mark, v.mark),
     background: (v.background as string) ?? DEFAULT_STYLE.background,
   };
   if (!(merged.unit > 0)) throw new Error("style.unit は正の数です");

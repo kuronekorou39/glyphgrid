@@ -97,3 +97,15 @@ describe("入れ子と lint", () => {
     expect(rules(crossing)).toContain("edge-through-node:e,box");
   });
 });
+
+describe("記号マークと線", () => {
+  it("マークは外接円から mark.gap だけ離して線を切る(尖った先端と線がつながらない)", async () => {
+    const { edgePolyline } = await import("../src/core/index.js");
+    const doc = build([
+      { op: "addNode", id: "ai", shape: "sparkle", fill: "solid", x: 3, y: 6 },
+      { op: "addNode", id: "b", shape: "circle", x: 10, y: 6 },
+    ]);
+    const pts = edgePolyline(style, { type: "straight" }, node(doc, "ai"), node(doc, "b"));
+    expectClose(pts[0]!.x - 3, style.node.sparkle.m / 2 + style.mark.gap);
+  });
+});

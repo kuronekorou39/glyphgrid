@@ -1,4 +1,4 @@
-import { EPS, type IconEdge, type IconNode, type Route } from "./model.js";
+import { EPS, MARK_SHAPES, type IconEdge, type IconNode, type Route } from "./model.js";
 import { outline, signedDistance, type Point } from "./shape.js";
 import type { Style } from "./style.js";
 
@@ -72,7 +72,9 @@ export function routePoints(route: Route, a: Point, b: Point): Point[] {
  * 矢印のある端は、矢じりの先がノードの外形から gap だけ離れた位置にくるように切る。
  */
 export function insideTest(style: Style, node: IconNode, arrow = false): (p: Point) => boolean {
-  const inset = arrow ? -style.arrow.gap : style.stroke.width / 2;
+  const mark = (MARK_SHAPES as readonly string[]).includes(node.shape);
+  // マークは外接円から離して切る。矢印がある端は矢じりの分だけさらに離す
+  const inset = mark ? -(style.mark.gap + (arrow ? style.arrow.gap : 0)) : arrow ? -style.arrow.gap : style.stroke.width / 2;
   const o = outline(style, node, inset);
   return (p) => signedDistance(o, p) < -EPS;
 }
