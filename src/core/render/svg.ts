@@ -1,7 +1,9 @@
 import { arrowAt, edgePolyline, roundedPath, type PathCmd, type Point } from "../geometry.js";
-import { findNode, type IconDoc, type IconEdge, type IconNode } from "../model.js";
+import { MARK_SHAPES, findNode, isBox, type IconDoc, type IconEdge, type IconNode } from "../model.js";
 import { outline } from "../shape.js";
-import { nodeDiameter, type Style } from "../style.js";
+import { boxSize, nodeDiameter, type Style } from "../style.js";
+
+const MARK_SET = new Set<string>(MARK_SHAPES);
 
 /** px 値を小数3桁まで、末尾の 0 を落として出力する */
 export function fmt(v: number): string {
@@ -50,7 +52,131 @@ function shapeElement(node: IconNode, style: Style, filled: boolean, scale = 1):
   }
 }
 
+/** マークの形。[-1, 1] の正方形に収めた座標で持ち、描くときに大きさを掛ける */
+const MARK_PATHS: Record<"check" | "cross", Point[][]> = {
+  check: [[{ x: -0.78, y: 0.02 }, { x: -0.26, y: 0.54 }, { x: 0.78, y: -0.52 }]],
+  cross: [
+    [{ x: -0.62, y: -0.62 }, { x: 0.62, y: 0.62 }],
+    [{ x: 0.62, y: -0.62 }, { x: -0.62, y: 0.62 }],
+  ],
+};
+
+/** マウスカーソル(矢印ポインタ)の輪郭。先端が左上 */
+const CURSOR: Point[] = [
+  { x: -0.62, y: -0.95 },
+  { x: -0.62, y: 0.68 },
+  { x: -0.17, y: 0.28 },
+  { x: 0.13, y: 0.95 },
+  { x: 0.42, y: 0.83 },
+  { x: 0.12, y: 0.18 },
+  { x: 0.62, y: 0.18 },
+];
+
+/** 4方向に尖ったきらめき(AI の記号)。内側の頂点は外側の SPARKLE_INNER 倍 */
+const SPARKLE_INNER = 0.3;
+const SPARKLE: Point[] = Array.from({ length: 8 }, (_, i) => {
+  const a = -Math.PI / 2 + (Math.PI / 4) * i;
+  const r = i % 2 === 0 ? 1 : SPARKLE_INNER;
+  return { x: r * Math.cos(a), y: r * Math.sin(a) };
+});
+
+function markElement(node: IconNode, style: Style): string {
+  const u = style.unit;
+  // 線幅ぶん内側に収めて、外形サイズを他の形とそろえる
+  const s = Math.max(0, nodeDiameter(style, node) / 2 - style.stroke.width / 2);
+  const at = (p: Point) => ({ x: node.x + p.x * s, y: node.y + p.y * s });
+  if (node.shape === "check" || node.shape === "cross") {
+    return `<path d="${MARK_PATHS[node.shape].map((line) => `M${line.map((p) => px(at(p), u)).join("L")}`).join("")}"/>`;
+  }
+  const pts = node.shape === "cursor" ? CURSOR : SPARKLE;
+  const fill = node.fill === "solid" ? ` fill="${style.stroke.color}"` : "";
+  return `<path d="M${pts.map((p) => px(at(p), u)).join("L")}Z"${fill}/>`;
+}
+
+/** フォルダの輪郭(左上にタブ)。角は枠と同じ半径で丸める */
+function folderPath(left: number, top: number, right: number, bottom: number, r: number, style: Style): string {
+  const f = style.frame;
+  const tabH = Math.min(f.tab, (bottom - top) / 3);
+  const tabW = Math.min((right - left) * f.tabRatio, f.tabMax);
+  const body = top + tabH;
+  const midX = (left + right) / 2;
+  // 辺の途中から始めて同じ点で終えると、roundedPath で全部の角を丸めた閉じた形になる
+  const pts = [
+    { x: midX, y: bottom },
+    { x: left, y: bottom },
+    { x: left, y: top },
+    { x: left + tabW, y: top },
+    { x: left + tabW + tabH, y: body },
+    { x: right, y: body },
+    { x: right, y: bottom },
+    { x: midX, y: bottom },
+  ];
+  return pathData(roundedPath(pts, r), style.unit) + "Z";
+}
+
+/** frame / table / text。線の中心が外形から線幅の半分だけ内側にくるように描く */
+function boxElement(node: IconNode, style: Style): string {
+  const u = style.unit;
+  const w = style.stroke.width;
+  const b = boxSize(style, node);
+  const left = node.x - b.w / 2 + w / 2;
+  const right = node.x + b.w / 2 - w / 2;
+  const top = node.y - b.h / 2 + w / 2;
+  const bottom = node.y + b.h / 2 - w / 2;
+  const line = (x1: number, y1: number, x2: number, y2: number) => `M${px({ x: x1, y: y1 }, u)}L${px({ x: x2, y: y2 }, u)}`;
+
+  if (node.shape === "text") {
+    const n = node.lines ?? 1;
+    const d = Array.from({ length: n }, (_, i) => {
+      const y = node.y - ((n - 1) * style.text.gap) / 2 + i * style.text.gap;
+      const end = n > 1 && i === n - 1 ? left + (right - left) * style.text.lastRatio : right;
+      return line(left, y, end, y);
+    });
+    return `<path d="${d.join("")}"/>`;
+  }
+
+  const r = Math.min(style.radius.frame, (right - left) / 2, (bottom - top) / 2);
+  const solid = node.shape === "frame" && node.fill === "solid";
+  const fillAttr = solid ? ` fill="${style.stroke.color}"` : "";
+  const out = [
+    node.shape === "frame" && node.tab
+      ? `<path d="${folderPath(left, top, right, bottom, r, style)}"${fillAttr}/>`
+      : `<rect x="${fmt(left * u)}" y="${fmt(top * u)}" width="${fmt((right - left) * u)}" height="${fmt((bottom - top) * u)}"${r > 0 ? ` rx="${fmt(r * u)}"` : ""}${fillAttr}/>`,
+  ];
+  if (node.shape === "frame") {
+    if (node.header && !solid) {
+      const y = node.y - b.h / 2 + style.frame.header + (node.tab ? style.frame.tab : 0);
+      out.push(`<path d="${line(left, y, right, y)}"/>`);
+    }
+    return out.join("\n");
+  }
+
+  // table:列と行の区切り線。header なら1行目を塗る
+  const cols = node.cols ?? 1;
+  const rows = node.rows ?? 1;
+  const cw = (right - left) / cols;
+  const rh = (bottom - top) / rows;
+  if (node.header) {
+    const hb = top + rh;
+    const k = 0.5523 * r; // 円弧を3次ベジェで近似する係数
+    const d =
+      `M${px({ x: left, y: hb }, u)}L${px({ x: left, y: top + r }, u)}` +
+      `C${px({ x: left, y: top + r - k }, u)} ${px({ x: left + r - k, y: top }, u)} ${px({ x: left + r, y: top }, u)}` +
+      `L${px({ x: right - r, y: top }, u)}` +
+      `C${px({ x: right - r + k, y: top }, u)} ${px({ x: right, y: top + r - k }, u)} ${px({ x: right, y: top + r }, u)}` +
+      `L${px({ x: right, y: hb }, u)}Z`;
+    out.push(`<path d="${d}" fill="${style.stroke.color}"/>`);
+  }
+  const d: string[] = [];
+  for (let i = 1; i < cols; i++) d.push(line(left + cw * i, top, left + cw * i, bottom));
+  for (let j = 1; j < rows; j++) d.push(line(left, top + rh * j, right, top + rh * j));
+  if (d.length) out.push(`<path d="${d.join("")}"/>`);
+  return out.join("\n");
+}
+
 function renderNode(node: IconNode, style: Style): string {
+  if (isBox(node.shape)) return boxElement(node, style);
+  if (MARK_SET.has(node.shape)) return markElement(node, style);
   if (node.fill === "solid") return shapeElement(node, style, true);
   const ring = shapeElement(node, style, false);
   return node.fill === "core" ? ring + "\n" + shapeElement(node, style, true, style.core) : ring;
@@ -112,9 +238,10 @@ export function renderSvg(doc: IconDoc, style: Style): string {
   lines.push(
     `<g fill="none" stroke="${style.stroke.color}" stroke-width="${fmt(style.stroke.width * u)}" stroke-linecap="${style.stroke.linecap}" stroke-linejoin="round">`,
   );
-  // 描画順はエッジが先、ノードが後
+  // 描画順:箱(枠・表・テキスト行)→ エッジ → それ以外のノード。枠の中に置いたものが枠に隠れないようにする
+  for (const node of doc.nodes) if (isBox(node.shape)) lines.push(renderNode(node, style));
   for (const edge of doc.edges) lines.push(...renderEdge(doc, style, edge));
-  for (const node of doc.nodes) lines.push(renderNode(node, style));
+  for (const node of doc.nodes) if (!isBox(node.shape)) lines.push(renderNode(node, style));
   lines.push("</g>", "</svg>");
   return lines.join("\n") + "\n";
 }

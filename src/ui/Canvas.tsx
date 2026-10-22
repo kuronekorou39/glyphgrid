@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "preact/hooks";
-import { applyOp, edgePathData, findNode, nodeHalfExtent, renderSvg, type IconDoc, type Issue, type Op, type Style } from "../core/index.js";
+import { applyOp, edgePathData, findNode, nodeHalfExtent, renderSvg, type IconDoc, type IconNode, type Issue, type Op, type Style } from "../core/index.js";
+import { nodeBounds, outline, signedDistance } from "../core/shape.js";
 import { GRID_STEP, snap } from "../core/commands/util.js";
 import type { EdgeLook, NodeLook, Tool } from "./tools.js";
 
@@ -28,6 +29,27 @@ type Drag =
 
 /** キャンバス外周に見せる余白(グリッド単位) */
 const MARGIN = 1;
+/** ノードの外形よりこれだけ外側までをクリックの当たりにする */
+const HIT_MARGIN = 0.25;
+
+/** 選択や lint の印。円と記号マークは円、それ以外は外接矩形で囲む */
+function Ring({ node, style, margin, stroke }: { node: IconNode; style: Style; margin: number; stroke?: string }) {
+  const u = style.unit;
+  if (node.shape === "circle" || ["check", "cross", "sparkle", "cursor"].includes(node.shape)) {
+    return <circle cx={node.x * u} cy={node.y * u} r={(nodeHalfExtent(style, node) + margin) * u} stroke={stroke} />;
+  }
+  const b = nodeBounds(style, node);
+  return (
+    <rect
+      x={(b.minX - margin) * u}
+      y={(b.minY - margin) * u}
+      width={(b.maxX - b.minX + 2 * margin) * u}
+      height={(b.maxY - b.minY + 2 * margin) * u}
+      rx={4}
+      stroke={stroke}
+    />
+  );
+}
 
 export function Canvas({ doc, style, selection, issues, tool, nodeLook, edgeLook, onSelect, onCommit, onOp }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -46,9 +68,16 @@ export function Canvas({ doc, style, selection, issues, tool, nodeLook, edgeLook
     return { x: p.x / u, y: p.y / u };
   };
 
-  /** 点の下にあるノード(後に描いたものを優先) */
-  const nodeAt = (p: Pt) =>
-    [...shown.nodes].reverse().find((n) => Math.hypot(n.x - p.x, n.y - p.y) <= nodeHalfExtent(style, n) + 0.25);
+  /** 点の下にあるノード。枠の中に置いたものが選べるよう、重なっていれば面積の小さいものを優先する */
+  const nodeAt = (p: Pt) => {
+    const area = (n: IconNode) => {
+      const b = nodeBounds(style, n);
+      return (b.maxX - b.minX) * (b.maxY - b.minY);
+    };
+    return shown.nodes
+      .filter((n) => signedDistance(outline(style, n, -HIT_MARGIN), p) <= 0)
+      .sort((a, b) => area(a) - area(b))[0];
+  };
 
   const onPointerDown = (e: PointerEvent) => {
     if (e.button !== 0) return;
@@ -151,7 +180,7 @@ export function Canvas({ doc, style, selection, issues, tool, nodeLook, edgeLook
         {issues.flatMap((issue) =>
           issue.ids.map((id) => {
             const n = findNode(shown, id);
-            if (n) return <circle cx={n.x * u} cy={n.y * u} r={(nodeHalfExtent(style, n) + 0.35) * u} stroke={issueColor(issue)} />;
+            if (n) return <Ring node={n} style={style} margin={0.35} stroke={issueColor(issue)} />;
             const d = edgePathData(shown, style, id);
             return d ? <path d={d} stroke={issueColor(issue)} stroke-width={style.stroke.width * u * 2.5} opacity={0.35} /> : null;
           }),
@@ -162,14 +191,7 @@ export function Canvas({ doc, style, selection, issues, tool, nodeLook, edgeLook
       <g class="selection">
         {selection.map((id) => {
           const n = findNode(shown, id);
-          if (n) {
-            const r = (nodeHalfExtent(style, n) + 0.2) * u;
-            return n.shape === "square" ? (
-              <rect x={n.x * u - r} y={n.y * u - r} width={2 * r} height={2 * r} rx={3} />
-            ) : (
-              <circle cx={n.x * u} cy={n.y * u} r={r} />
-            );
-          }
+          if (n) return <Ring node={n} style={style} margin={0.2} />;
           const d = edgePathData(shown, style, id);
           return d ? <path class="edge-selected" d={d} stroke-width={style.stroke.width * u * 2.5} /> : null;
         })}

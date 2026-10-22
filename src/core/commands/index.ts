@@ -2,14 +2,18 @@ import type { IconDoc } from "../model.js";
 import type { Style } from "../style.js";
 import { connect, disconnect, reverse, setArrow, setDash, setRoute } from "./edges.js";
 import { align, centerContent, distribute, mirror, normalizeSize, radial, snapToGrid } from "./layout.js";
-import { addNode, moveNode, nudge, removeNode, setFill, setShape, setSize } from "./nodes.js";
+import { addNode, moveNode, nudge, removeNode, setBox, setFill, setShape, setSize } from "./nodes.js";
 import { tidy } from "./tidy.js";
 import type { Args, CommandDef } from "./types.js";
 
 export type { Args, Command, CommandDef } from "./types.js";
 
 export const COMMANDS: Record<string, CommandDef> = {
-  addNode: { run: addNode, params: ["shape", "x", "y", "fill?", "size?", "id?"], summary: "ノードを追加する(shape に dot | ring | square も可)" },
+  addNode: {
+    run: addNode,
+    params: ["shape", "x", "y", "fill?", "size?", "id?", "w?", "h?", "cols?", "rows?", "header?", "tab?", "lines?"],
+    summary: "ノードを追加する(shape に dot | ring | square も可。frame / table / text は w・h などで大きさを決める)",
+  },
   removeNode: { run: removeNode, params: ["ids"], summary: "ノードと接続エッジを削除する" },
   moveNode: { run: moveNode, params: ["id", "x", "y"], summary: "ノードを移動する" },
   nudge: { run: nudge, params: ["ids", "dx", "dy"], summary: "ノードを相対移動する" },
@@ -17,6 +21,7 @@ export const COMMANDS: Record<string, CommandDef> = {
   setFill: { run: setFill, params: ["ids", "fill"], summary: "塗りを変える" },
   setKind: { run: setShape, params: ["ids", "kind"], summary: "旧形式の kind(dot | ring | square)で形と塗りを変える" },
   setSize: { run: setSize, params: ["ids", "size"], summary: "サイズを変える" },
+  setBox: { run: setBox, params: ["ids", "w?", "h?", "cols?", "rows?", "header?", "tab?", "lines?"], summary: "frame / table / text の大きさ・行列数・見出し・タブ・行数を変える" },
   connect: { run: connect, params: ["from", "to", "route?", "dash?", "arrow?", "id?"], summary: "エッジを作る" },
   disconnect: { run: disconnect, params: ["ids"], summary: "エッジを消す" },
   setRoute: { run: setRoute, params: ["ids", "route"], summary: "経路を変える" },

@@ -6,6 +6,7 @@ import {
   NODE_SHAPES,
   SIZE_TOKENS,
   findNode,
+  isBox,
   renderSvg,
   type IconDoc,
   type EdgeArrow,
@@ -253,6 +254,37 @@ function NodeFields({ nodes, onOp }: { nodes: IconNode[]; onOp: (op: Op) => void
   );
 }
 
+/** frame / table / text の大きさと属性 */
+function BoxFields({ node: n, onOp }: { node: IconNode; onOp: (op: Op) => void }) {
+  const set = (props: Record<string, unknown>) => onOp({ op: "setBox", ids: [n.id], ...props });
+  const positive = (v: number | undefined) => v !== undefined && v > 0;
+  return (
+    <>
+      <NumberField label="幅" value={n.w} onChange={(v) => positive(v) && set({ w: v })} />
+      {n.shape !== "text" && <NumberField label="高さ" value={n.h} onChange={(v) => positive(v) && set({ h: v })} />}
+      {n.shape === "table" && (
+        <>
+          <NumberField label="列" step={1} value={n.cols} onChange={(v) => positive(v) && set({ cols: Math.round(v!) })} />
+          <NumberField label="行" step={1} value={n.rows} onChange={(v) => positive(v) && set({ rows: Math.round(v!) })} />
+        </>
+      )}
+      {n.shape === "text" && <NumberField label="行数" step={1} value={n.lines} onChange={(v) => positive(v) && set({ lines: Math.round(v!) })} />}
+      {n.shape !== "text" && (
+        <label class="field">
+          <span>{n.shape === "table" ? "見出し" : "タイトル"}</span>
+          <input type="checkbox" checked={!!n.header} onChange={(e) => set({ header: (e.target as HTMLInputElement).checked })} />
+        </label>
+      )}
+      {n.shape === "frame" && (
+        <label class="field">
+          <span>タブ</span>
+          <input type="checkbox" checked={!!n.tab} onChange={(e) => set({ tab: (e.target as HTMLInputElement).checked })} />
+        </label>
+      )}
+    </>
+  );
+}
+
 function EdgeLookFields({ edges, onOp }: { edges: IconEdge[]; onOp: (op: Op) => void }) {
   const ids = edges.map((e) => e.id);
   return (
@@ -279,6 +311,7 @@ export function Inspector({ doc, selection, onOp }: InspectorProps) {
         <NodeFields nodes={nodes} onOp={onOp} />
         <NumberField label="x" value={n.x} onChange={(v) => v !== undefined && onOp({ op: "moveNode", id: n.id, x: v, y: n.y })} />
         <NumberField label="y" value={n.y} onChange={(v) => v !== undefined && onOp({ op: "moveNode", id: n.id, x: n.x, y: v })} />
+        {isBox(n.shape) && <BoxFields node={n} onOp={onOp} />}
       </section>
     );
   }

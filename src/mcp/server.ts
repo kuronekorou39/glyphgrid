@@ -32,6 +32,9 @@ const INSTRUCTIONS = `glyphgrid: グリッド上のノード + エッジでア�
 
 要素:
 - ノード shape: ${NODE_SHAPES.join(" | ")} / fill: ${NODE_FILLS.join(" | ")} / size: ${SIZE_TOKENS.join(" | ")}
+  記号マーク check / cross / sparkle(AI)/ cursor(操作)は size で大きさが決まる
+  箱 frame(画面・入れ物。header でタイトルバー、tab でフォルダ形)/ table(cols・rows、header で見出し行を塗る)/ text(文字の代わりの横棒を lines 本)は w・h で大きさを決める
+  frame / table の内側に置いたノードは入れ子として扱う(重なりにならない)。表のセルに置くときは、セルの中心が 0.5 グリッドに乗るよう w を cols の倍数にする
 - エッジ route(短縮形): straight | hv | vh | hvh[:mid] | vhv[:mid] | hdh[:mid[:span]] | vdv[:mid[:span]]
   hvh の mid は縦の幹の x、vhv の mid は横の幹の y。同じ始点で同じ mid のエッジは幹を共有する(分岐)
 - エッジ dash: ${EDGE_DASHES.join(" | ")} / arrow: ${EDGE_ARROWS.join(" | ")}

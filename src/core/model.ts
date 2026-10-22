@@ -1,7 +1,32 @@
 // アイコンのデータモデル。座標はすべてグリッド単位。
 
-export const NODE_SHAPES = ["circle", "square", "diamond", "hexagon", "triangle"] as const;
+/** 基本の形。size トークンで大きさが決まる */
+export const BASIC_SHAPES = ["circle", "square", "diamond", "hexagon", "triangle"] as const;
+/** 記号マーク。size トークンで大きさが決まる。check / cross は線だけで描き、fill は使わない */
+export const MARK_SHAPES = ["check", "cross", "sparkle", "cursor"] as const;
+/**
+ * 箱の形。大きさは w / h(グリッド単位)で決まり、size は使わない。
+ * frame: 角丸の枠(header でタイトルバー)。中に他の要素を入れられる(画面、Case など)
+ * table: 行と列の格子(header で見出し行を塗る)
+ * text: 文字の代わりの横棒を lines 本並べる(高さは行数で決まり h は使わない)
+ */
+export const BOX_SHAPES = ["frame", "table", "text"] as const;
+export const SIZED_SHAPES = [...BASIC_SHAPES, ...MARK_SHAPES] as const;
+export const NODE_SHAPES = [...SIZED_SHAPES, ...BOX_SHAPES] as const;
 export type NodeShape = (typeof NODE_SHAPES)[number];
+export type SizedShape = (typeof SIZED_SHAPES)[number];
+export type BoxShape = (typeof BOX_SHAPES)[number];
+
+export const isBox = (shape: NodeShape): shape is BoxShape => (BOX_SHAPES as readonly string[]).includes(shape);
+/** 中に他の要素を入れられる形 */
+export const isContainer = (shape: NodeShape) => shape === "frame" || shape === "table";
+
+/** 箱の形を w / h なしで追加したときの既定値 */
+export const BOX_DEFAULTS: Record<BoxShape, { w: number; h: number; cols?: number; rows?: number; lines?: number }> = {
+  frame: { w: 4, h: 3 },
+  table: { w: 4, h: 3, cols: 2, rows: 3 },
+  text: { w: 3, h: 0, lines: 1 },
+};
 
 /** solid: 塗り、outline: 白抜き、core: 白抜き + 中心に同じ形の小さな塗り */
 export const NODE_FILLS = ["solid", "outline", "core"] as const;
@@ -24,6 +49,18 @@ export interface IconNode {
   x: number;
   y: number;
   size: SizeToken;
+  /** 箱の形(frame / table / text)の幅と高さ。x, y は中心 */
+  w?: number;
+  h?: number;
+  /** table の列数と行数 */
+  cols?: number;
+  rows?: number;
+  /** frame はタイトルバー、table は見出し行の塗り */
+  header?: boolean;
+  /** frame をフォルダの形(左上にタブ)にする。Case や入れ物を、中の画面と見分けるために使う */
+  tab?: boolean;
+  /** text の行数 */
+  lines?: number;
 }
 
 export type OrthoBend = "hv" | "vh" | "hvh" | "vhv";
@@ -178,6 +215,13 @@ export function validateDoc(value: unknown): string[] {
     if (!NODE_FILLS.includes(node.fill as NodeFill)) errors.push(`${where}: fill が不正です: ${String(node.fill)}`);
     if (!SIZE_TOKENS.includes(node.size as SizeToken)) errors.push(`${where}: size が不正です: ${String(node.size)}`);
     if (!isNum(node.x) || !isNum(node.y)) errors.push(`${where}: x, y は数値です`);
+    for (const k of ["w", "h"] as const) if (node[k] !== undefined && !(isNum(node[k]) && node[k] > 0)) errors.push(`${where}: ${k} は正の数です`);
+    for (const k of ["cols", "rows", "lines"] as const)
+      if (node[k] !== undefined && !(Number.isInteger(node[k]) && (node[k] as number) >= 1)) errors.push(`${where}: ${k} は 1 以上の整数です`);
+    if (node.header !== undefined && typeof node.header !== "boolean") errors.push(`${where}: header は true / false です`);
+    if (node.tab !== undefined && typeof node.tab !== "boolean") errors.push(`${where}: tab は true / false です`);
+    if (isBox(node.shape as NodeShape) && (node.w === undefined || (node.shape !== "text" && node.h === undefined)))
+      errors.push(`${where}: ${String(node.shape)} には w${node.shape === "text" ? "" : " と h"} が必要です`);
   });
   (d.edges as unknown[]).forEach((e, i) => {
     const edge = e as Record<string, unknown>;

@@ -67,6 +67,35 @@ export function shapeAndFill(args: Record<string, unknown>): { shape?: NodeShape
   };
 }
 
+function posInt(v: unknown, name: string): number {
+  const n = num(v, name);
+  if (!Number.isInteger(n) || n < 1) throw new Error(`${name} は 1 以上の整数です(${JSON.stringify(v)})`);
+  return n;
+}
+
+function bool(v: unknown, name: string): boolean {
+  if (v === true || v === "true") return true;
+  if (v === false || v === "false") return false;
+  throw new Error(`${name} は true か false です(${JSON.stringify(v)})`);
+}
+
+export type BoxProps = Pick<IconNode, "w" | "h" | "cols" | "rows" | "header" | "tab" | "lines">;
+
+/** 箱の形の属性(w / h / cols / rows / header / lines)のうち、指定されたものだけを読む */
+export function boxProps(args: Record<string, unknown>): BoxProps {
+  const out: BoxProps = {};
+  for (const k of ["w", "h"] as const) {
+    if (args[k] === undefined) continue;
+    const n = num(args[k], k);
+    if (!(n > 0)) throw new Error(`${k} は正の数です`);
+    out[k] = n;
+  }
+  for (const k of ["cols", "rows", "lines"] as const) if (args[k] !== undefined) out[k] = posInt(args[k], k);
+  if (args.header !== undefined) out.header = bool(args.header, "header");
+  if (args.tab !== undefined) out.tab = bool(args.tab, "tab");
+  return out;
+}
+
 /** dash を読む。"solid" は省略(undefined)として返す */
 export function dash(v: unknown): IconEdge["dash"] {
   const d = oneOf(v, EDGE_DASHES, "dash");

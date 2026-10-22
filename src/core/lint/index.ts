@@ -1,7 +1,7 @@
 import { contentBounds } from "../commands/layout.js";
 import { GRID_STEP } from "../commands/util.js";
 import { edgePolyline, type Point } from "../geometry.js";
-import { EPS, findNode, type IconDoc, type IconNode } from "../model.js";
+import { EPS, findNode, isBox, isContainer, type IconDoc, type IconNode } from "../model.js";
 import { boundaryPoints, nodeBounds, outline, signedDistance } from "../shape.js";
 import type { Style } from "../style.js";
 
@@ -74,12 +74,23 @@ function nodeGap(a: IconNode, b: IconNode, style: Style): number {
   return Math.min(one, two);
 }
 
+/** inner が container(frame / table)の線の内側に収まっている */
+export function contains(style: Style, container: IconNode, inner: IconNode): boolean {
+  if (!isContainer(container.shape) || container.id === inner.id) return false;
+  const c = nodeBounds(style, container);
+  const n = nodeBounds(style, inner);
+  const w = style.stroke.width;
+  return n.minX >= c.minX + w - EPS && n.maxX <= c.maxX - w + EPS && n.minY >= c.minY + w - EPS && n.maxY <= c.maxY - w + EPS;
+}
+
 function overlap(doc: IconDoc, style: Style): Issue[] {
   const issues: Issue[] = [];
   for (let i = 0; i < doc.nodes.length; i++) {
     for (let j = i + 1; j < doc.nodes.length; j++) {
       const a = doc.nodes[i]!;
       const b = doc.nodes[j]!;
+      // 枠や表の中に置いたものは重なりではない(入れ子)
+      if (contains(style, a, b) || contains(style, b, a)) continue;
       const gap = nodeGap(a, b, style);
       if (gap < -EPS) issues.push({ rule: "overlap", severity: "error", ids: [a.id, b.id], message: `${a.id} と ${b.id} が重なっています` });
       else if (gap < MIN_NODE_GAP - EPS)
@@ -113,6 +124,8 @@ function edgeThroughNode(doc: IconDoc, style: Style): Issue[] {
     const pts = edgePolyline(style, e.route, from, to, e.arrow);
     for (const n of doc.nodes) {
       if (n.id === e.from || n.id === e.to) continue;
+      // 枠の中のノードから出入りする線は、枠の線や表の格子をまたいでよい
+      if (contains(style, n, from) || contains(style, n, to)) continue;
       const hit = pts.slice(1).some((p, i) => segmentDistance(pts[i]!, p, n, style) < halfWidth - EPS);
       if (hit) issues.push({ rule: "edge-through-node", severity: "error", ids: [e.id, n.id], message: `${e.id}(${e.from}→${e.to})が ${n.id} に重なっています` });
     }
@@ -171,6 +184,7 @@ function inconsistentSize(doc: IconDoc): Issue[] {
   for (const e of doc.edges) for (const id of [e.from, e.to]) degree.set(id, (degree.get(id) ?? 0) + 1);
   const groups = new Map<string, IconNode[]>();
   for (const n of doc.nodes) {
+    if (isBox(n.shape)) continue;
     const key = `${n.shape}(${n.fill})/${degree.get(n.id) ?? 0}`;
     groups.set(key, [...(groups.get(key) ?? []), n]);
   }

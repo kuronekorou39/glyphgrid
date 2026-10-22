@@ -1,5 +1,7 @@
-import type { IconNode, NodeShape } from "./model.js";
-import { nodeDiameter, type Style } from "./style.js";
+import { MARK_SHAPES, isBox, type IconNode, type NodeShape } from "./model.js";
+import { boxSize, nodeDiameter, type Style } from "./style.js";
+
+const isMark = (shape: NodeShape) => (MARK_SHAPES as readonly string[]).includes(shape);
 
 export interface Point {
   x: number;
@@ -22,14 +24,24 @@ const POLYGONS: Partial<Record<NodeShape, { sides: number; shiftY: number }>> = 
  * 外形を inset だけ内側に寄せた形(負なら外側に広げる)。
  * 描画は線幅の半分だけ内側の線で描くので、inset = 線幅/2 が線の中心線になる
  */
-export function outline(style: Style, node: Pick<IconNode, "shape" | "size" | "x" | "y">, inset = 0, scale = 1): Outline {
-  const d = nodeDiameter(style, node) * scale;
+export type ShapeNode = Pick<IconNode, "shape" | "size" | "x" | "y" | "w" | "h" | "lines">;
+
+function rect(c: Point, hw: number, hh: number): Outline {
+  const w = Math.max(0, hw);
+  const h = Math.max(0, hh);
+  return { type: "poly", pts: [{ x: c.x - w, y: c.y - h }, { x: c.x + w, y: c.y - h }, { x: c.x + w, y: c.y + h }, { x: c.x - w, y: c.y + h }] };
+}
+
+export function outline(style: Style, node: ShapeNode, inset = 0, scale = 1): Outline {
   const c = { x: node.x, y: node.y };
-  if (node.shape === "circle") return { type: "circle", c, r: Math.max(0, d / 2 - inset) };
-  if (node.shape === "square") {
-    const h = Math.max(0, d / 2 - inset);
-    return { type: "poly", pts: [{ x: c.x - h, y: c.y - h }, { x: c.x + h, y: c.y - h }, { x: c.x + h, y: c.y + h }, { x: c.x - h, y: c.y + h }] };
+  if (isBox(node.shape)) {
+    const b = boxSize(style, node);
+    return rect(c, (b.w * scale) / 2 - inset, (b.h * scale) / 2 - inset);
   }
+  const d = nodeDiameter(style, node) * scale;
+  // マークは線が細く形も凹んでいるので、線を切る位置や重なりの判定は外接円で行う
+  if (node.shape === "circle" || isMark(node.shape)) return { type: "circle", c, r: Math.max(0, d / 2 - inset) };
+  if (node.shape === "square") return rect(c, d / 2 - inset, d / 2 - inset);
   const { sides, shiftY } = POLYGONS[node.shape]!;
   const R = d / 2;
   const apothem = R * Math.cos(Math.PI / sides);
@@ -79,7 +91,7 @@ export function boundaryPoints(o: Outline, n = 48): Point[] {
 }
 
 /** ノードの実際の外形の外接矩形(多角形は頂点から求めるので、三角形や六角形で余白を取りすぎない) */
-export function nodeBounds(style: Style, node: Pick<IconNode, "shape" | "size" | "x" | "y">) {
+export function nodeBounds(style: Style, node: ShapeNode) {
   const o = outline(style, node);
   if (o.type === "circle") return { minX: o.c.x - o.r, minY: o.c.y - o.r, maxX: o.c.x + o.r, maxY: o.c.y + o.r };
   const xs = o.pts.map((p) => p.x);

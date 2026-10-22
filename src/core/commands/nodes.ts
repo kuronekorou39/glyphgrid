@@ -1,6 +1,6 @@
-import { DEFAULT_FILL, DEFAULT_SIZE, allIds, nextId, requireNode } from "../model.js";
+import { BOX_DEFAULTS, DEFAULT_FILL, DEFAULT_SIZE, allIds, isBox, nextId, requireNode, type IconNode } from "../model.js";
 import type { Command } from "./types.js";
-import { clone, fill, idList, num, optNum, pickNodes, shapeAndFill, shiftMids, size, str } from "./util.js";
+import { boxProps, clone, fill, idList, num, optNum, pickNodes, shapeAndFill, shiftMids, size, str } from "./util.js";
 
 export const addNode: Command = (doc, _style, args) => {
   const next = clone(doc);
@@ -8,14 +8,33 @@ export const addNode: Command = (doc, _style, args) => {
   if (allIds(doc).includes(id)) throw new Error(`id "${id}" はすでに使われています`);
   const look = shapeAndFill(args);
   if (!look.shape) throw new Error("shape を指定してください");
-  next.nodes.push({
+  const node: IconNode = {
     id,
     shape: look.shape,
     fill: look.fill ?? DEFAULT_FILL,
     x: num(args.x, "x"),
     y: num(args.y, "y"),
     size: args.size === undefined ? DEFAULT_SIZE : size(args.size),
-  });
+  };
+  if (isBox(look.shape)) {
+    // 箱の形は w / h などを持つ。省略した値は既定値で埋めて、JSON を見れば大きさがわかるようにする
+    const { h, ...defaults } = BOX_DEFAULTS[look.shape];
+    Object.assign(node, look.shape === "text" ? defaults : { ...defaults, h }, boxProps(args));
+    if (look.shape === "text") delete node.h;
+  }
+  next.nodes.push(node);
+  return next;
+};
+
+/** 箱の形(frame / table / text)の大きさや属性を変える。指定した項目だけ変わる */
+export const setBox: Command = (doc, _style, args) => {
+  const props = boxProps(args);
+  if (!Object.keys(props).length) throw new Error("w / h / cols / rows / header / lines のどれかを指定してください");
+  const next = clone(doc);
+  for (const node of pickNodes(next, idList(args.ids))) {
+    if (!isBox(node.shape)) throw new Error(`${node.id} は ${node.shape} なので setBox は使えません(frame / table / text のみ)`);
+    Object.assign(node, props);
+  }
   return next;
 };
 
@@ -57,6 +76,17 @@ export const setShape: Command = (doc, _style, args) => {
   for (const node of pickNodes(next, idList(args.ids))) {
     node.shape = look.shape;
     if (look.fill) node.fill = look.fill;
+    // 箱の形にするときは足りない属性を既定値で補い、箱でなくするときは箱の属性を消す
+    if (isBox(look.shape)) {
+      const { h, ...defaults } = BOX_DEFAULTS[look.shape];
+      for (const [k, v] of Object.entries(look.shape === "text" ? defaults : { ...defaults, h }))
+        if (node[k as keyof IconNode] === undefined) Object.assign(node, { [k]: v });
+      if (look.shape === "text") delete node.h;
+      if (look.shape !== "table") delete node.cols, delete node.rows;
+      if (look.shape !== "text") delete node.lines;
+    } else {
+      for (const k of ["w", "h", "cols", "rows", "header", "tab", "lines"] as const) delete node[k];
+    }
   }
   return next;
 };

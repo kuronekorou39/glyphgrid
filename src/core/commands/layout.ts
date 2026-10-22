@@ -64,6 +64,8 @@ export const snapToGrid: Command = (doc, _style, args) => {
     if (ids && !ids.has(n.id)) continue;
     n.x = snap(n.x);
     n.y = snap(n.y);
+    if (n.w !== undefined) n.w = snap(n.w);
+    if (n.h !== undefined) n.h = snap(n.h);
   }
   for (const e of next.edges) {
     if (ids && !(ids.has(e.from) || ids.has(e.to))) continue;
