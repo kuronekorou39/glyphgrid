@@ -3,10 +3,18 @@
 グリッド上のノード(塗り丸・白抜き丸・角丸四角)とエッジ(直線・直角線・斜め線)で、統一デザインのアイコンを作るツール。
 人は GUI で、LLM は CLI / JSON で、同じコマンド群を使って編集する。
 
-## 使い方
+## エディタ
 
 ```
 npm install
+npm run dev        # http://localhost:5173 を開く
+```
+
+`sets/` の JSON を CLI などで書き換えると、画面に即座に反映される。
+
+## CLI
+
+```
 npm run glyphgrid -- new sample/foo                       # sets/sample/icons/foo.icon.json を作る
 npm run glyphgrid -- apply sets/sample/icons/foo.icon.json ops.json
 npm run glyphgrid -- lint sets/sample                    # 問題があれば終了コード 1

@@ -6,7 +6,9 @@
 ## 構成
 
 - `src/core/`:モデル・スタイル・描画・コマンド。純粋関数のみ。I/O と DOM 依存を持ち込まない(Node とブラウザ両方で動かす)
-- `src/cli/`:CLI。ファイル I/O はここだけ
+- `src/cli/`:CLI。ファイル I/O は cli と server だけ
+- `src/server/`:Vite 開発サーバー用の `/api` と `sets/` の変更通知(M4 で Tauri に置き換える)
+- `src/ui/`:Web UI(Preact)。キャンバスは core の `renderSvg` をそのまま重ねて表示する
 - `sets/<set>/style.json` + `icons/*.icon.json`:1セット1スタイル。スタイルを変えればセット全体が揃って変わる
 - 型の定義は `src/core/model.ts`、スタイルは `src/core/style.ts`
 
@@ -34,6 +36,6 @@ LLM の作業手順:`new` → ops を `apply`(最後に `tidy`)→ `lint` → `e
 ## マイルストーン
 
 - M1 core + CLI(完了)
-- M2 Web UI:編集、`sets/` のファイル監視、アンドゥ(スナップショット履歴)
+- M2 Web UI(完了。`npm run dev`)
 - M3 lint(完了。`src/core/lint/`)、スタイル変更時の一括再書き出し
 - M4 Tauri 化、MCP サーバー内蔵
