@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "glyphgrid": {
+      "command": "node",
+      "args": ["--import", "tsx", "src/mcp/main.ts"]
+    }
+  }
+}

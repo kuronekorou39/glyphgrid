@@ -6,8 +6,9 @@
 ## 構成
 
 - `src/core/`:モデル・スタイル・描画・コマンド。純粋関数のみ。I/O と DOM 依存を持ち込まない(Node とブラウザ両方で動かす)
-- `src/cli/`:CLI。ファイル I/O は cli と server だけ
-- `src/server/`:Vite 開発サーバー用の `/api` と `sets/` の変更通知(M4 で Tauri に置き換える)
+- `src/cli/`:CLI。ファイル I/O は cli / server / mcp だけ
+- `src/server/`:Node 側の共通処理。`sets/` の読み書き API、Vite 開発サーバー用の `/api` と変更通知、PNG 化
+- `src/mcp/`:MCP サーバー(stdio、`.mcp.json` で登録)。core のコマンドをそのまま道具として公開する
 - `src/ui/`:Web UI(Preact)。キャンバスは core の `renderSvg` をそのまま重ねて表示する
 - `sets/<set>/style.json` + `icons/*.icon.json`:1セット1スタイル。スタイルを変えればセット全体が揃って変わる
 - 型の定義は `src/core/model.ts`、スタイルは `src/core/style.ts`
@@ -27,12 +28,12 @@
 - 旧形式(version 1 の `kind`: dot / ring / square)は読み込み時に変換する。ops でも `kind` や `shape: "dot"` を別名として受け付ける
 - 要素を足すときは「形・塗り・線の種類」のようにトークンとして足し、寸法やパターンは style.json に置く
 
-## CLI
+## CLI と MCP
 
 `npm run glyphgrid -- <command>`。`commands` でコマンドと引数順の一覧が出る。
 route の短縮形:`straight` `hv` `vh` `hvh[:mid]` `vhv[:mid]` `hdh[:mid[:span]]` `vdv[:mid[:span]]`(hdh は水平→斜め→水平)。
 同じ始点で同じ mid を持つ hvh / vhv は幹を共有する(分岐の表現)。
-LLM の作業手順:`new` → ops を `apply`(最後に `tidy`)→ `lint` → `export` / `sheet` の PNG を目視確認。
+LLM の作業手順:`create_icon` → `apply_ops`(最後に `tidy`)→ lint が空になるまで直す → `render` の PNG を目視確認(MCP がなければ CLI の `new` / `apply` / `lint` / `export`)。
 
 ## 規約
 
@@ -44,5 +45,5 @@ LLM の作業手順:`new` → ops を `apply`(最後に `tidy`)→ `lint` → `e
 
 - M1 core + CLI(完了)
 - M2 Web UI(完了。`npm run dev`)
-- M3 lint(完了。`src/core/lint/`)、スタイル変更時の一括再書き出し
-- M4 Tauri 化、MCP サーバー内蔵
+- M3 lint、スタイル変更時の一括再書き出し(`export --watch`)(完了)
+- M4 MCP サーバー(完了)、Tauri 化(未着手。ファイル I/O を `src/server/` から Tauri 側に移し、MCP を内蔵する)

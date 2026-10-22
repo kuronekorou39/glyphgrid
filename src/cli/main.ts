@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // glyphgrid CLI。ファイル I/O はこのディレクトリだけで行う。
-import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, watch, writeFileSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
-import { Resvg } from "@resvg/resvg-js";
+
 import {
   COMMANDS,
   DEFAULT_STYLE,
@@ -20,6 +20,7 @@ import {
   type Style,
 } from "../core/index.js";
 import { renderSheet } from "../core/render/sheet.js";
+import { toPng } from "../server/png.js";
 
 const ICON_EXT = ".icon.json";
 const STYLE_FILE = "style.json";
@@ -31,7 +32,8 @@ const USAGE = `glyphgrid <command> [args]
   run <icon.json> <command> [args...]                    単発コマンド(key=value でも指定可)
   tidy <icon.json>                                       整形して上書き保存
   lint <icon.json|set-dir> [--strict] [--json]           問題があれば終了コード 1(--strict は警告でも 1)
-  export <icon.json|set-dir> --format svg|png --out <dir> [--scale 1]
+  export <icon.json|set-dir> --format svg|png --out <dir> [--scale 1] [--watch]
+                                                         --watch: 変更を監視し、style.json が変われば全体を書き出し直す
   sheet <set-dir> --out sheet.png|sheet.svg [--columns n] [--scale 1]
   commands                                               コマンド一覧
 
@@ -43,7 +45,7 @@ interface Parsed {
   flags: Record<string, string | true>;
 }
 
-const BOOLEAN_FLAGS = new Set(["dry-run", "help", "strict", "json"]);
+const BOOLEAN_FLAGS = new Set(["dry-run", "help", "strict", "json", "watch"]);
 
 function parseArgv(argv: string[]): Parsed {
   const positional: string[] = [];
@@ -118,8 +120,49 @@ function iconBaseName(path: string): string {
   return basename(path).replace(ICON_EXT, "").replace(/\.json$/, "");
 }
 
-function toPng(svg: string, scale: number): Buffer {
-  return new Resvg(svg, { fitTo: { mode: "zoom", value: scale } }).render().asPng();
+/** 監視中の変更をまとめて処理するまでの待ち時間(ms)。保存時の連続イベントを1回にまとめる */
+const WATCH_DEBOUNCE = 150;
+
+/**
+ * export --watch:style.json が変わればセット全体を、アイコンが変わればそのアイコンだけを書き出し直す。
+ * 読めないファイル(書きかけなど)はエラーを表示して監視を続ける
+ */
+function watchExport(
+  p: Parsed,
+  target: string,
+  h: { exportAll: () => void; exportOne: (file: string) => void; reloadStyle: () => void },
+): void {
+  const isDir = statSync(target).isDirectory();
+  const root = isDir ? target : dirname(target);
+  const explicitStyle = flagStr(p, "style");
+  const styleFile = resolve(explicitStyle ?? findStyle(root) ?? join(root, STYLE_FILE));
+  const pending = new Set<string>();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  const flush = () => {
+    const files = [...pending];
+    pending.clear();
+    try {
+      if (files.includes(styleFile)) {
+        h.reloadStyle();
+        console.log("style.json が変わったので全体を書き出し直します");
+        h.exportAll();
+        return;
+      }
+      for (const f of files) if (existsSync(f) && f.endsWith(ICON_EXT) && (isDir || f === resolve(target))) h.exportOne(f);
+    } catch (e) {
+      console.error(`エラー: ${(e as Error).message}`);
+    }
+  };
+  const queue = (file: string) => {
+    pending.add(resolve(file));
+    clearTimeout(timer);
+    timer = setTimeout(flush, WATCH_DEBOUNCE);
+  };
+
+  watch(root, { recursive: true }, (_ev, name) => name && queue(join(root, name.toString())));
+  if (!styleFile.startsWith(resolve(root))) watch(styleFile, () => queue(styleFile));
+  console.log(`監視中: ${root}(Ctrl+C で終了)`);
 }
 
 function saveDoc(p: Parsed, path: string, doc: IconDoc): void {
@@ -196,19 +239,22 @@ const handlers: Record<string, (p: Parsed) => void> = {
   },
 
   export(p) {
-    const [, target] = need(p, 2, "export <icon.json|set-dir> --format svg|png --out <dir>");
+    const [, target] = need(p, 2, "export <icon.json|set-dir> --format svg|png --out <dir> [--watch]");
     const format = flagStr(p, "format") ?? "svg";
     if (format !== "svg" && format !== "png") throw new Error("--format は svg か png です");
     const out = flagStr(p, "out") ?? "out";
     const scale = flagNum(p, "scale", 1);
-    const style = loadStyle(p, target!);
+    let style = loadStyle(p, target!);
     mkdirSync(out, { recursive: true });
-    for (const file of listIcons(target!)) {
-      const svg = renderSvg(readDoc(file), style);
+    const exportOne = (file: string) => {
       const dest = join(out, `${iconBaseName(file)}.${format}`);
+      const svg = renderSvg(readDoc(file), style);
       writeFileSync(dest, format === "svg" ? svg : toPng(svg, scale));
       console.log(dest);
-    }
+    };
+    const exportAll = () => listIcons(target!).forEach(exportOne);
+    exportAll();
+    if (p.flags.watch) watchExport(p, target!, { exportAll, exportOne, reloadStyle: () => (style = loadStyle(p, target!)) });
   },
 
   sheet(p) {

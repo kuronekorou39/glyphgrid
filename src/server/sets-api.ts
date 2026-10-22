@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { join, relative, sep } from "node:path";
 import type { Plugin } from "vite";
-import { DEFAULT_STYLE, emptyDoc, formatDoc, parseDoc, parseStyle } from "../core/index.js";
+import { DEFAULT_STYLE, emptyDoc, formatDoc, parseDoc, parseStyle, type IconDoc } from "../core/index.js";
 
 const ICON_EXT = ".icon.json";
 const SAFE_NAME = /^[\w.-]+$/;
@@ -73,15 +73,24 @@ export function createSetsApi(setsDir: string) {
       if (readFileSync(path, "utf8").replace(/\r\n/g, "\n") !== text) writeFileSync(path, text);
     },
 
-    createIcon(set: string, icon: string) {
+    /** 空のアイコンを作る。セットがなければ既定のスタイルで作る */
+    createIcon(set: string, icon: string, canvas?: IconDoc["canvas"]) {
       const path = iconPath(set, icon);
       if (existsSync(path)) throw new HttpError(409, `すでにあります: ${set}/${icon}`);
       mkdirSync(join(setDir(set), "icons"), { recursive: true });
       const stylePath = join(setDir(set), "style.json");
       if (!existsSync(stylePath)) writeFileSync(stylePath, JSON.stringify(DEFAULT_STYLE, null, 2) + "\n");
-      const doc = emptyDoc(icon);
+      const doc = emptyDoc(icon, canvas);
       writeFileSync(path, formatDoc(doc));
       return doc;
+    },
+
+    /** style.json を検証して書く(既定値で補った完全な形で保存する) */
+    writeStyle(set: string, value: unknown) {
+      const style = parseStyle(value);
+      mkdirSync(setDir(set), { recursive: true });
+      writeFileSync(join(setDir(set), "style.json"), JSON.stringify(style, null, 2) + "\n");
+      return style;
     },
 
     /** 変更されたファイルのパスを、通知用の { set, icon } にする。対象外なら null */

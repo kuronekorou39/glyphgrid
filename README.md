@@ -12,13 +12,19 @@ npm run dev        # http://localhost:5173 を開く
 
 `sets/` の JSON を CLI などで書き換えると、画面に即座に反映される。
 
+## MCP サーバー
+
+Claude Code でこのリポジトリを開くと `.mcp.json` の `glyphgrid` サーバーが使える(初回に承認が必要)。
+アイコンの作成・ops の適用・lint・PNG での確認・スタイル変更ができ、書き換えはエディタに即座に反映される。
+他のクライアントからは `npm run mcp`(stdio)で起動する。
+
 ## CLI
 
 ```
 npm run glyphgrid -- new sample/foo                       # sets/sample/icons/foo.icon.json を作る
 npm run glyphgrid -- apply sets/sample/icons/foo.icon.json ops.json
 npm run glyphgrid -- lint sets/sample                    # 問題があれば終了コード 1
-npm run glyphgrid -- export sets/sample --format png --out out
+npm run glyphgrid -- export sets/sample --format png --out out   # --watch で変更を監視して書き出し直す
 npm run glyphgrid -- sheet sets/sample --out out/sheet.png
 npm run glyphgrid -- commands                             # コマンド一覧
 ```
