@@ -27,6 +27,8 @@ export interface Style {
   arrow: { size: number; angle: number; gap: number };
   /** 記号マーク(check / cross / sparkle / cursor)と線の隙間。マークは外接円で線を切るので、尖った先端と線がつながって見えないよう離す */
   mark: { gap: number };
+  /** table の見出し行(header: true)の高さ。残りの行は残りの高さを等分する */
+  table: { header: number };
   background: string;
 }
 
@@ -53,6 +55,7 @@ export const DEFAULT_STYLE: Style = {
   dash: { dashed: [0.6, 0.55], dotted: [0, 0.6] },
   arrow: { size: 0.7, angle: 35, gap: 0.25 },
   mark: { gap: 0.35 },
+  table: { header: 1 },
   background: "transparent",
 };
 
@@ -71,6 +74,8 @@ export function nodeDiameter(style: Style, node: Pick<IconNode, "shape" | "size"
     const b = boxSize(style, node);
     return Math.max(b.w, b.h);
   }
+  // 基本の形は w で直径(外形サイズ)を直接決められる。size の段階では足りない大きな円(レンズなど)に使う
+  if (node.w !== undefined) return node.w;
   return style.node[node.shape][node.size];
 }
 
@@ -104,6 +109,7 @@ export function parseStyle(value: unknown): Style {
     dash: merge(DEFAULT_STYLE.dash, v.dash),
     arrow: merge(DEFAULT_STYLE.arrow, v.arrow),
     mark: merge(DEFAULT_STYLE.mark, v.mark),
+    table: merge(DEFAULT_STYLE.table, v.table),
     background: (v.background as string) ?? DEFAULT_STYLE.background,
   };
   if (!(merged.unit > 0)) throw new Error("style.unit は正の数です");

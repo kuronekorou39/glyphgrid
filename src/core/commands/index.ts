@@ -11,7 +11,7 @@ export type { Args, Command, CommandDef } from "./types.js";
 export const COMMANDS: Record<string, CommandDef> = {
   addNode: {
     run: addNode,
-    params: ["shape", "x", "y", "fill?", "size?", "id?", "w?", "h?", "cols?", "rows?", "header?", "tab?", "lines?"],
+    params: ["shape", "x", "y", "fill?", "size?", "id?", "w?", "h?", "cols?", "rows?", "header?", "tab?", "lines?", "badge?"],
     summary: "ノードを追加する(shape に dot | ring | square も可。frame / table / text は w・h などで大きさを決める)",
   },
   removeNode: { run: removeNode, params: ["ids"], summary: "ノードと接続エッジを削除する" },
@@ -21,7 +21,7 @@ export const COMMANDS: Record<string, CommandDef> = {
   setFill: { run: setFill, params: ["ids", "fill"], summary: "塗りを変える" },
   setKind: { run: setShape, params: ["ids", "kind"], summary: "旧形式の kind(dot | ring | square)で形と塗りを変える" },
   setSize: { run: setSize, params: ["ids", "size"], summary: "サイズを変える" },
-  setBox: { run: setBox, params: ["ids", "w?", "h?", "cols?", "rows?", "header?", "tab?", "lines?"], summary: "frame / table / text の大きさ・行列数・見出し・タブ・行数を変える" },
+  setBox: { run: setBox, params: ["ids", "w?", "h?", "cols?", "rows?", "header?", "tab?", "lines?", "badge?"], summary: "frame / table / text の大きさ・行列数・見出し・タブ・行数、各ノードの直径(w)とバッジを変える" },
   connect: { run: connect, params: ["from", "to", "route?", "dash?", "arrow?", "id?"], summary: "エッジを作る" },
   disconnect: { run: disconnect, params: ["ids"], summary: "エッジを消す" },
   setRoute: { run: setRoute, params: ["ids", "route"], summary: "経路を変える" },

@@ -79,7 +79,7 @@ function bool(v: unknown, name: string): boolean {
   throw new Error(`${name} は true か false です(${JSON.stringify(v)})`);
 }
 
-export type BoxProps = Pick<IconNode, "w" | "h" | "cols" | "rows" | "header" | "tab" | "lines">;
+export type BoxProps = Pick<IconNode, "w" | "h" | "cols" | "rows" | "header" | "tab" | "lines" | "badge">;
 
 /** 箱の形の属性(w / h / cols / rows / header / lines)のうち、指定されたものだけを読む */
 export function boxProps(args: Record<string, unknown>): BoxProps {
@@ -93,6 +93,7 @@ export function boxProps(args: Record<string, unknown>): BoxProps {
   for (const k of ["cols", "rows", "lines"] as const) if (args[k] !== undefined) out[k] = posInt(args[k], k);
   if (args.header !== undefined) out.header = bool(args.header, "header");
   if (args.tab !== undefined) out.tab = bool(args.tab, "tab");
+  if (args.badge !== undefined) out.badge = bool(args.badge, "badge");
   return out;
 }
 

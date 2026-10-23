@@ -1,6 +1,6 @@
 import { BOX_DEFAULTS, DEFAULT_FILL, DEFAULT_SIZE, allIds, isBox, nextId, requireNode, type IconNode } from "../model.js";
 import type { Command } from "./types.js";
-import { boxProps, clone, fill, idList, num, optNum, pickNodes, shapeAndFill, shiftMids, size, str } from "./util.js";
+import { boxProps, type BoxProps, clone, fill, idList, num, optNum, pickNodes, shapeAndFill, shiftMids, size, str } from "./util.js";
 
 export const addNode: Command = (doc, _style, args) => {
   const next = clone(doc);
@@ -21,6 +21,8 @@ export const addNode: Command = (doc, _style, args) => {
     const { h, ...defaults } = BOX_DEFAULTS[look.shape];
     Object.assign(node, look.shape === "text" ? defaults : { ...defaults, h }, boxProps(args));
     if (look.shape === "text") delete node.h;
+  } else {
+    Object.assign(node, sizedProps(node, boxProps(args)));
   }
   next.nodes.push(node);
   return next;
@@ -29,14 +31,18 @@ export const addNode: Command = (doc, _style, args) => {
 /** 箱の形(frame / table / text)の大きさや属性を変える。指定した項目だけ変わる */
 export const setBox: Command = (doc, _style, args) => {
   const props = boxProps(args);
-  if (!Object.keys(props).length) throw new Error("w / h / cols / rows / header / lines のどれかを指定してください");
+  if (!Object.keys(props).length) throw new Error("w / h / cols / rows / header / tab / lines / badge のどれかを指定してください");
   const next = clone(doc);
-  for (const node of pickNodes(next, idList(args.ids))) {
-    if (!isBox(node.shape)) throw new Error(`${node.id} は ${node.shape} なので setBox は使えません(frame / table / text のみ)`);
-    Object.assign(node, props);
-  }
+  for (const node of pickNodes(next, idList(args.ids))) Object.assign(node, isBox(node.shape) ? props : sizedProps(node, props));
   return next;
 };
+
+/** 箱以外の形が持てる属性は w(直径)と badge だけ */
+function sizedProps(node: IconNode, props: BoxProps): BoxProps {
+  const extra = Object.keys(props).filter((k) => k !== "w" && k !== "badge");
+  if (extra.length) throw new Error(`${node.id} は ${node.shape} なので ${extra.join(", ")} は使えません(w と badge のみ)`);
+  return props;
+}
 
 export const removeNode: Command = (doc, _style, args) => {
   const ids = new Set(idList(args.ids ?? args.id, "id"));

@@ -20,6 +20,8 @@ export type BoxShape = (typeof BOX_SHAPES)[number];
 export const isBox = (shape: NodeShape): shape is BoxShape => (BOX_SHAPES as readonly string[]).includes(shape);
 /** 中に他の要素を入れられる形 */
 export const isContainer = (shape: NodeShape) => shape === "frame" || shape === "table";
+/** 中に他の要素を入れられるノード。w で直径を決めた circle(レンズなど)も入れ物になる */
+export const isContainerNode = (node: Pick<IconNode, "shape" | "w">) => isContainer(node.shape) || (node.shape === "circle" && node.w !== undefined);
 
 /** 箱の形を w / h なしで追加したときの既定値 */
 export const BOX_DEFAULTS: Record<BoxShape, { w: number; h: number; cols?: number; rows?: number; lines?: number }> = {
@@ -59,6 +61,11 @@ export interface IconNode {
   header?: boolean;
   /** frame をフォルダの形(左上にタブ)にする。Case や入れ物を、中の画面と見分けるために使う */
   tab?: boolean;
+  /**
+   * 枠や表の線の上に重ねて置く(バッジ)。重なった部分の枠の線は切り抜き、lint の重なりにもしない。
+   * ウィンドウの角に AI の記号を添える、などに使う
+   */
+  badge?: boolean;
   /** text の行数 */
   lines?: number;
 }
@@ -220,6 +227,7 @@ export function validateDoc(value: unknown): string[] {
       if (node[k] !== undefined && !(Number.isInteger(node[k]) && (node[k] as number) >= 1)) errors.push(`${where}: ${k} は 1 以上の整数です`);
     if (node.header !== undefined && typeof node.header !== "boolean") errors.push(`${where}: header は true / false です`);
     if (node.tab !== undefined && typeof node.tab !== "boolean") errors.push(`${where}: tab は true / false です`);
+    if (node.badge !== undefined && typeof node.badge !== "boolean") errors.push(`${where}: badge は true / false です`);
     if (isBox(node.shape as NodeShape) && (node.w === undefined || (node.shape !== "text" && node.h === undefined)))
       errors.push(`${where}: ${String(node.shape)} には w${node.shape === "text" ? "" : " と h"} が必要です`);
   });

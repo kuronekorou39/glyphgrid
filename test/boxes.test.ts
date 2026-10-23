@@ -19,14 +19,15 @@ describe("箱の形(frame / table / text)", () => {
     expect(node(doc, "x").h).toBeUndefined();
   });
 
-  it("setBox で大きさと属性を変える。箱以外には使えない", () => {
+  it("setBox で大きさと属性を変える。箱以外は w(直径)と badge だけ", () => {
     const doc = build([
       { op: "addNode", id: "t", shape: "table", x: 6, y: 6 },
       { op: "addNode", id: "c", shape: "circle", x: 2, y: 2 },
       { op: "setBox", ids: ["t"], w: 6, cols: 3, header: true },
     ]);
     expect(node(doc, "t")).toMatchObject({ w: 6, h: 3, cols: 3, header: true });
-    expect(() => build([{ op: "setBox", ids: ["c"], w: 3 }], doc)).toThrow(/setBox/);
+    expect(node(build([{ op: "setBox", ids: ["c"], w: 3 }], doc), "c").w).toBe(3);
+    expect(() => build([{ op: "setBox", ids: ["c"], cols: 3 }], doc)).toThrow(/w と badge のみ/);
     expect(() => build([{ op: "setBox", ids: ["t"], cols: 0 }], doc)).toThrow(/cols/);
   });
 
@@ -107,5 +108,38 @@ describe("記号マークと線", () => {
     ]);
     const pts = edgePolyline(style, { type: "straight" }, node(doc, "ai"), node(doc, "b"));
     expectClose(pts[0]!.x - 3, style.node.sparkle.m / 2 + style.mark.gap);
+  });
+});
+
+describe("バッジ・円の直径・見出し行の高さ", () => {
+  it("badge は枠の線と重なっても lint にならず、その部分をマスクで切り抜く", () => {
+    const doc = build([
+      { op: "addNode", id: "web", shape: "frame", x: 6, y: 6.5, w: 8, h: 7, header: true },
+      { op: "addNode", id: "ai", shape: "sparkle", fill: "solid", x: 10, y: 3, badge: true },
+    ]);
+    expect(rules(doc)).toEqual([]);
+    const svg = renderSvg(doc, style);
+    expect(svg).toMatch(/<mask id="gg-badge-[0-9a-z]+"/);
+    expect(svg).toMatch(/<g mask="url\(#gg-badge-[0-9a-z]+\)">/);
+    expect(rules(build([{ op: "setBox", ids: ["ai"], badge: false }], doc))).toContain("overlap:web,ai");
+  });
+
+  it("基本の形は w で直径を決められ、w を持つ円は入れ物になる", () => {
+    const doc = build([
+      { op: "addNode", id: "lens", shape: "circle", w: 8, x: 6, y: 6 },
+      { op: "addNode", id: "p", shape: "square", size: "s", x: 6, y: 6 },
+    ]);
+    expect(nodeBounds(style, node(doc, "lens"))).toEqual({ minX: 2, minY: 2, maxX: 10, maxY: 10 });
+    expect(rules(doc)).toEqual([]);
+    expect(() => build([{ op: "addNode", shape: "circle", x: 1, y: 1, cols: 2 }])).toThrow(/w と badge のみ/);
+  });
+
+  it("table の見出し行は style.table.header の高さで、残りの行は等分する", () => {
+    const doc = build([{ op: "addNode", shape: "table", x: 6, y: 6, w: 4, h: 5, cols: 1, rows: 3, header: true }]);
+    const svg = renderSvg(doc, style);
+    const u = style.unit;
+    // 見出しの下端 = 上端 3.5 + 1、残り 2 行は 4 を等分 → 区切りは y = 4.5, 6.5
+    expect(svg).toContain(`L${(6 + 2 - style.stroke.width / 2) * u} ${4.5 * u}`);
+    expect(svg).toContain(`${6.5 * u}`);
   });
 });

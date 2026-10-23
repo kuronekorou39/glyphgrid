@@ -155,9 +155,14 @@ function boxElement(node: IconNode, style: Style): string {
   const cols = node.cols ?? 1;
   const rows = node.rows ?? 1;
   const cw = (right - left) / cols;
-  const rh = (bottom - top) / rows;
+  // 行の区切り線の y。header なら1行目(見出し)は style.table.header の高さで、残りの行で残りを等分する
+  const outerTop = node.y - b.h / 2;
+  const headerY = outerTop + Math.min(style.table.header, b.h);
+  const rowLines = node.header
+    ? Array.from({ length: rows - 1 }, (_, k) => headerY + (k * (node.y + b.h / 2 - headerY)) / (rows - 1))
+    : Array.from({ length: rows - 1 }, (_, j) => top + ((bottom - top) / rows) * (j + 1));
   if (node.header) {
-    const hb = top + rh;
+    const hb = rows > 1 ? headerY : bottom;
     const k = 0.5523 * r; // 円弧を3次ベジェで近似する係数
     const d =
       `M${px({ x: left, y: hb }, u)}L${px({ x: left, y: top + r }, u)}` +
@@ -169,7 +174,7 @@ function boxElement(node: IconNode, style: Style): string {
   }
   const d: string[] = [];
   for (let i = 1; i < cols; i++) d.push(line(left + cw * i, top, left + cw * i, bottom));
-  for (let j = 1; j < rows; j++) d.push(line(left, top + rh * j, right, top + rh * j));
+  for (const y of rowLines) d.push(line(left, y, right, y));
   if (d.length) out.push(`<path d="${d.join("")}"/>`);
   return out.join("\n");
 }
@@ -225,6 +230,33 @@ function renderEdge(doc: IconDoc, style: Style, edge: IconEdge): string[] {
   return out;
 }
 
+/** 文字列の短いハッシュ(マスクの id 用) */
+function hash(s: string): string {
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
+  return h.toString(36);
+}
+
+/**
+ * バッジ(badge: true)の下にある枠・表・エッジの線を切り抜くマスク。背景で塗って隠さず、透過でも正しく見える。
+ * id は切り抜く形から作るので、同じ画面に複数のアイコンを並べても衝突しない(同じ id なら中身も同じ)
+ */
+function badgeMask(doc: IconDoc, style: Style): { id: string; defs: string } | null {
+  const badges = doc.nodes.filter((n) => n.badge);
+  if (!badges.length) return null;
+  const u = style.unit;
+  const w = fmt(doc.canvas.cols * u);
+  const h = fmt(doc.canvas.rows * u);
+  const holes = badges
+    .map((n) => `<circle cx="${fmt(n.x * u)}" cy="${fmt(n.y * u)}" r="${fmt((nodeDiameter(style, n) / 2 + style.mark.gap) * u)}" fill="#000"/>`)
+    .join("");
+  const id = `gg-badge-${hash(w + h + holes)}`;
+  return {
+    id,
+    defs: `<mask id="${id}" maskUnits="userSpaceOnUse" x="0" y="0" width="${w}" height="${h}"><rect width="${w}" height="${h}" fill="#fff" stroke="none"/>${holes.replace(/fill="#000"/g, 'fill="#000" stroke="none"')}</mask>`,
+  };
+}
+
 export function renderSvg(doc: IconDoc, style: Style): string {
   const u = style.unit;
   const width = fmt(doc.canvas.cols * u);
@@ -239,8 +271,11 @@ export function renderSvg(doc: IconDoc, style: Style): string {
     `<g fill="none" stroke="${style.stroke.color}" stroke-width="${fmt(style.stroke.width * u)}" stroke-linecap="${style.stroke.linecap}" stroke-linejoin="round">`,
   );
   // 描画順:箱(枠・表・テキスト行)→ エッジ → それ以外のノード。枠の中に置いたものが枠に隠れないようにする
+  const knockout = badgeMask(doc, style);
+  if (knockout) lines.push(knockout.defs, `<g mask="url(#${knockout.id})">`);
   for (const node of doc.nodes) if (isBox(node.shape)) lines.push(renderNode(node, style));
   for (const edge of doc.edges) lines.push(...renderEdge(doc, style, edge));
+  if (knockout) lines.push("</g>");
   for (const node of doc.nodes) if (!isBox(node.shape)) lines.push(renderNode(node, style));
   lines.push("</g>", "</svg>");
   return lines.join("\n") + "\n";

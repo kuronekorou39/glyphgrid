@@ -1,7 +1,7 @@
 import { contentBounds } from "../commands/layout.js";
 import { GRID_STEP } from "../commands/util.js";
 import { edgePolyline, type Point } from "../geometry.js";
-import { EPS, findNode, isBox, isContainer, type IconDoc, type IconNode } from "../model.js";
+import { EPS, findNode, isBox, isContainerNode, type IconDoc, type IconNode } from "../model.js";
 import { boundaryPoints, nodeBounds, outline, signedDistance } from "../shape.js";
 import type { Style } from "../style.js";
 
@@ -76,10 +76,16 @@ function nodeGap(a: IconNode, b: IconNode, style: Style): number {
 
 /** inner が container(frame / table)の線の内側に収まっている */
 export function contains(style: Style, container: IconNode, inner: IconNode): boolean {
-  if (!isContainer(container.shape) || container.id === inner.id) return false;
+  if (!isContainerNode(container) || container.id === inner.id) return false;
   const c = nodeBounds(style, container);
   const n = nodeBounds(style, inner);
   const w = style.stroke.width;
+  if (container.shape === "circle") {
+    // 円の入れ物(レンズ):中身の外接矩形の四隅が、線の内側の円に入っていること
+    const r = (c.maxX - c.minX) / 2 - w;
+    const corners = [[n.minX, n.minY], [n.maxX, n.minY], [n.maxX, n.maxY], [n.minX, n.maxY]] as const;
+    return corners.every(([x, y]) => Math.hypot(x - container.x, y - container.y) <= r + EPS);
+  }
   return n.minX >= c.minX + w - EPS && n.maxX <= c.maxX - w + EPS && n.minY >= c.minY + w - EPS && n.maxY <= c.maxY - w + EPS;
 }
 
@@ -91,6 +97,8 @@ function overlap(doc: IconDoc, style: Style): Issue[] {
       const b = doc.nodes[j]!;
       // 枠や表の中に置いたものは重なりではない(入れ子)
       if (contains(style, a, b) || contains(style, b, a)) continue;
+      // バッジは枠や表の線の上に重ねるもの(線は切り抜いて描く)
+      if ((a.badge && isContainerNode(b)) || (b.badge && isContainerNode(a))) continue;
       const gap = nodeGap(a, b, style);
       if (gap < -EPS) issues.push({ rule: "overlap", severity: "error", ids: [a.id, b.id], message: `${a.id} と ${b.id} が重なっています` });
       else if (gap < MIN_NODE_GAP - EPS)
@@ -126,6 +134,8 @@ function edgeThroughNode(doc: IconDoc, style: Style): Issue[] {
       if (n.id === e.from || n.id === e.to) continue;
       // 枠の中のノードから出入りする線は、枠の線や表の格子をまたいでよい
       if (contains(style, n, from) || contains(style, n, to)) continue;
+      // バッジの下を通る線は切り抜かれる
+      if (n.badge) continue;
       const hit = pts.slice(1).some((p, i) => segmentDistance(pts[i]!, p, n, style) < halfWidth - EPS);
       if (hit) issues.push({ rule: "edge-through-node", severity: "error", ids: [e.id, n.id], message: `${e.id}(${e.from}→${e.to})が ${n.id} に重なっています` });
     }
