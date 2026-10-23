@@ -31,7 +31,7 @@ export const addNode: Command = (doc, _style, args) => {
 /** 箱の形(frame / table / text)の大きさや属性を変える。指定した項目だけ変わる */
 export const setBox: Command = (doc, _style, args) => {
   const props = boxProps(args);
-  if (!Object.keys(props).length) throw new Error("w / h / cols / rows / header / tab / lines / badge のどれかを指定してください");
+  if (!Object.keys(props).length) throw new Error("w / h / cols / rows / header / tab / corner / lines / badge のどれかを指定してください");
   const next = clone(doc);
   for (const node of pickNodes(next, idList(args.ids))) Object.assign(node, isBox(node.shape) ? props : sizedProps(node, props));
   return next;
@@ -91,7 +91,7 @@ export const setShape: Command = (doc, _style, args) => {
       if (look.shape !== "table") delete node.cols, delete node.rows;
       if (look.shape !== "text") delete node.lines;
     } else {
-      for (const k of ["w", "h", "cols", "rows", "header", "tab", "lines"] as const) delete node[k];
+      for (const k of ["w", "h", "cols", "rows", "header", "tab", "corner", "lines"] as const) delete node[k];
     }
   }
   return next;

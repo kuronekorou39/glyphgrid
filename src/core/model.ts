@@ -4,7 +4,7 @@
 /** 基本の形。size トークンで大きさが決まる。point は描かれない点で、線だけの模様の端や中継点に使う */
 export const BASIC_SHAPES = ["circle", "square", "diamond", "hexagon", "triangle", "point"] as const;
 /** 記号マーク。size トークンで大きさが決まる。check / cross は線だけで描き、fill は使わない */
-export const MARK_SHAPES = ["check", "cross", "sparkle", "cursor"] as const;
+export const MARK_SHAPES = ["check", "cross", "sparkle", "cursor", "pen"] as const;
 /**
  * 箱の形。大きさは w / h(グリッド単位)で決まり、size は使わない。
  * frame: 角丸の枠(header でタイトルバー)。中に他の要素を入れられる(画面、Case など)
@@ -62,6 +62,8 @@ export interface IconNode {
   header?: boolean;
   /** frame をフォルダの形(左上にタブ)にする。Case や入れ物を、中の画面と見分けるために使う */
   tab?: boolean;
+  /** frame をページの形(右上の角を折る)にする。書類を、画面や入れ物と見分けるために使う */
+  corner?: boolean;
   /**
    * 枠や表の線の上に重ねて置く(バッジ)。重なった部分の枠の線は切り抜き、lint の重なりにもしない。
    * ウィンドウの角に AI の記号を添える、などに使う
@@ -228,6 +230,7 @@ export function validateDoc(value: unknown): string[] {
       if (node[k] !== undefined && !(Number.isInteger(node[k]) && (node[k] as number) >= 1)) errors.push(`${where}: ${k} は 1 以上の整数です`);
     if (node.header !== undefined && typeof node.header !== "boolean") errors.push(`${where}: header は true / false です`);
     if (node.tab !== undefined && typeof node.tab !== "boolean") errors.push(`${where}: tab は true / false です`);
+    if (node.corner !== undefined && typeof node.corner !== "boolean") errors.push(`${where}: corner は true / false です`);
     if (node.badge !== undefined && typeof node.badge !== "boolean") errors.push(`${where}: badge は true / false です`);
     if (isBox(node.shape as NodeShape) && (node.w === undefined || (node.shape !== "text" && node.h === undefined)))
       errors.push(`${where}: ${String(node.shape)} には w${node.shape === "text" ? "" : " と h"} が必要です`);

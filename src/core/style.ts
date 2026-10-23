@@ -17,15 +17,15 @@ export interface Style {
   core: number;
   /** edgeCorner: 直角線の角丸、square: 四角の角丸、frame: 枠と表の角丸 */
   radius: { edgeCorner: number; square: number; frame: number };
-  /** frame のタイトルバーの高さ(上端から区切り線まで)、フォルダのタブの高さと幅(枠の幅に対する比、上限 tabMax) */
-  frame: { header: number; tab: number; tabRatio: number; tabMax: number };
+  /** frame のタイトルバーの高さ(上端から区切り線まで)、フォルダのタブの高さと幅(枠の幅に対する比、上限 tabMax)、ページの角折りの大きさ */
+  frame: { header: number; tab: number; tabRatio: number; tabMax: number; corner: number };
   /** text の行の間隔。2行以上のとき最後の行は lastRatio の長さにする */
   text: { gap: number; lastRatio: number };
   /** 破線・点線の [線, 間隔]。点線は線 0 + 丸い線端で点になる */
   dash: { dashed: [number, number]; dotted: [number, number] };
   /** 矢印。size は矢じりの辺の長さ、angle は開き角の半分(度)、gap はノードとの隙間 */
   arrow: { size: number; angle: number; gap: number };
-  /** 記号マーク(check / cross / sparkle / cursor)と線の隙間。マークは外接円で線を切るので、尖った先端と線がつながって見えないよう離す */
+  /** 記号マーク(check / cross / sparkle / cursor / pen)と線の隙間。マークは外接円で線を切るので、尖った先端と線がつながって見えないよう離す */
   mark: { gap: number };
   /** table の見出し行(header: true)の高さ。残りの行は残りの高さを等分する */
   table: { header: number };
@@ -47,11 +47,12 @@ export const DEFAULT_STYLE: Style = {
     cross: { s: 1.0, m: 1.5, l: 2.2 },
     sparkle: { s: 1.5, m: 2.3, l: 3.2 },
     cursor: { s: 1.4, m: 2.0, l: 2.8 },
+    pen: { s: 1.8, m: 2.8, l: 4.0 },
     point: { s: 0, m: 0, l: 0 },
   },
   core: 0.4,
   radius: { edgeCorner: 0.75, square: 0.12, frame: 0.35 },
-  frame: { header: 0.9, tab: 0.8, tabRatio: 0.4, tabMax: 4 },
+  frame: { header: 0.9, tab: 0.8, tabRatio: 0.4, tabMax: 4, corner: 1.2 },
   text: { gap: 0.8, lastRatio: 0.6 },
   dash: { dashed: [0.6, 0.55], dotted: [0, 0.6] },
   arrow: { size: 0.7, angle: 35, gap: 0.25 },

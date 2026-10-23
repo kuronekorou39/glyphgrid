@@ -142,3 +142,26 @@ describe("バッジ・円の直径・見出し行の高さ", () => {
     for (const y of [4.5, 6.5]) expect(svg).toMatch(new RegExp(`M[0-9.]+ ${y * u}L[0-9.]+ ${y * u}`));
   });
 });
+
+describe("ペンと角折りのページ", () => {
+  it("pen は白抜きのときだけペン先の線を描き、塗りなら輪郭だけ", () => {
+    const doc = build([
+      { op: "addNode", id: "a", shape: "pen", x: 3, y: 3 },
+      { op: "addNode", id: "b", shape: "pen", fill: "solid", x: 9, y: 9 },
+    ]);
+    const svg = renderSvg(doc, style);
+    const paths = svg.match(/<path d="[^"]*"[^>]*\/>/g)!;
+    expect(paths).toHaveLength(2);
+    expect(paths[0]!.match(/M/g)).toHaveLength(2);
+    expect(paths[1]).toMatch(/Z" fill=/);
+    expect(rules(doc)).toEqual([]);
+  });
+
+  it("corner の frame は右上を折ったページの形で、タイトルバーの線も引ける", () => {
+    const doc = build([{ op: "addNode", id: "p", shape: "frame", x: 6, y: 6, w: 6, h: 8, corner: true, header: true }]);
+    const svg = renderSvg(doc, style);
+    expect(svg).not.toContain("<rect");
+    expect(svg).toMatchSnapshot();
+    expect(Object.keys(build([{ op: "setShape", ids: ["p"], shape: "circle" }], doc).nodes[0]!)).not.toContain("corner");
+  });
+});

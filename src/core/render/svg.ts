@@ -72,6 +72,21 @@ const CURSOR: Point[] = [
   { x: 0.62, y: 0.18 },
 ];
 
+/** ペン(書く記号)。先端が左下、軸は 45°。軸に沿った座標で持ち、回して使う */
+const PEN_HALF = 0.24;
+const PEN_AXIS: Point[] = [
+  { x: -1, y: 0 },
+  { x: -0.55, y: -PEN_HALF },
+  { x: 0.98, y: -PEN_HALF },
+  { x: 0.98, y: PEN_HALF },
+  { x: -0.55, y: PEN_HALF },
+];
+/** 軸に沿った座標を 45° 回して画面座標にする(先端が左下) */
+const penTurn = (p: Point): Point => ({ x: (p.x + p.y) / Math.SQRT2, y: (p.y - p.x) / Math.SQRT2 });
+const PEN: Point[] = PEN_AXIS.map(penTurn);
+/** ペンの先(ペン先と軸の境)の線。白抜きのときだけ描く */
+const PEN_NIB: Point[] = [PEN[1]!, PEN[4]!];
+
 /** 4方向に尖ったきらめき(AI の記号)。内側の頂点は外側の SPARKLE_INNER 倍 */
 const SPARKLE_INNER = 0.3;
 const SPARKLE: Point[] = Array.from({ length: 8 }, (_, i) => {
@@ -88,9 +103,10 @@ function markElement(node: IconNode, style: Style): string {
   if (node.shape === "check" || node.shape === "cross") {
     return `<path d="${MARK_PATHS[node.shape].map((line) => `M${line.map((p) => px(at(p), u)).join("L")}`).join("")}"/>`;
   }
-  const pts = node.shape === "cursor" ? CURSOR : SPARKLE;
+  const pts = node.shape === "cursor" ? CURSOR : node.shape === "pen" ? PEN : SPARKLE;
   const fill = node.fill === "solid" ? ` fill="${style.stroke.color}"` : "";
-  return `<path d="M${pts.map((p) => px(at(p), u)).join("L")}Z"${fill}/>`;
+  const nib = node.shape === "pen" && !fill ? `M${PEN_NIB.map((p) => px(at(p), u)).join("L")}` : "";
+  return `<path d="M${pts.map((p) => px(at(p), u)).join("L")}Z${nib}"${fill}/>`;
 }
 
 /** フォルダの輪郭(左上にタブ)。角は枠と同じ半径で丸める */
@@ -112,6 +128,27 @@ function folderPath(left: number, top: number, right: number, bottom: number, r:
     { x: midX, y: bottom },
   ];
   return pathData(roundedPath(pts, r), style.unit) + "Z";
+}
+
+/** ページの輪郭(右上の角を折る)。折った三角も描く */
+function pagePath(left: number, top: number, right: number, bottom: number, r: number, style: Style): string {
+  const c = Math.min(style.frame.corner, (right - left) / 2, (bottom - top) / 2);
+  const midX = (left + right) / 2;
+  const pts = [
+    { x: midX, y: bottom },
+    { x: left, y: bottom },
+    { x: left, y: top },
+    { x: right - c, y: top },
+    { x: right, y: top + c },
+    { x: right, y: bottom },
+    { x: midX, y: bottom },
+  ];
+  const fold = [
+    { x: right - c, y: top },
+    { x: right - c, y: top + c },
+    { x: right, y: top + c },
+  ];
+  return pathData(roundedPath(pts, r), style.unit) + "Z" + pathData(roundedPath(fold, r / 2), style.unit);
 }
 
 /** frame / table / text。線の中心が外形から線幅の半分だけ内側にくるように描く */
@@ -141,7 +178,9 @@ function boxElement(node: IconNode, style: Style): string {
   const out = [
     node.shape === "frame" && node.tab
       ? `<path d="${folderPath(left, top, right, bottom, r, style)}"${fillAttr}/>`
-      : `<rect x="${fmt(left * u)}" y="${fmt(top * u)}" width="${fmt((right - left) * u)}" height="${fmt((bottom - top) * u)}"${r > 0 ? ` rx="${fmt(r * u)}"` : ""}${fillAttr}/>`,
+      : node.shape === "frame" && node.corner
+        ? `<path d="${pagePath(left, top, right, bottom, r, style)}"${fillAttr}/>`
+        : `<rect x="${fmt(left * u)}" y="${fmt(top * u)}" width="${fmt((right - left) * u)}" height="${fmt((bottom - top) * u)}"${r > 0 ? ` rx="${fmt(r * u)}"` : ""}${fillAttr}/>`,
   ];
   if (node.shape === "frame") {
     if (node.header && !solid) {
@@ -254,6 +293,14 @@ function knockoutMask(doc: IconDoc, style: Style, knockers: IconNode[]): { id: s
       if (isBox(n.shape)) {
         const b = nodeBounds(style, n);
         return `<rect x="${fmt((b.minX - g) * u)}" y="${fmt((b.minY - g) * u)}" width="${fmt((b.maxX - b.minX + 2 * g) * u)}" height="${fmt((b.maxY - b.minY + 2 * g) * u)}" rx="${fmt((style.radius.frame + g) * u)}"/>`;
+      }
+      if (n.shape === "pen") {
+        // ペンは細長いので、外接円ではなく軸に沿った長方形で切り抜く(書類の角を削りすぎない)
+        const r = nodeDiameter(style, n) / 2;
+        const k = g / r;
+        const rect = [{ x: -1 - k, y: -PEN_HALF - k }, { x: 0.98 + k, y: -PEN_HALF - k }, { x: 0.98 + k, y: PEN_HALF + k }, { x: -1 - k, y: PEN_HALF + k }];
+        const pts = rect.map(penTurn).map((p) => px({ x: n.x + p.x * r, y: n.y + p.y * r }, u));
+        return `<polygon points="${pts.join(" ")}"/>`;
       }
       return `<circle cx="${fmt(n.x * u)}" cy="${fmt(n.y * u)}" r="${fmt((nodeDiameter(style, n) / 2 + g) * u)}"/>`;
     })

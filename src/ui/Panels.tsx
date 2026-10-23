@@ -281,6 +281,12 @@ function BoxFields({ node: n, onOp }: { node: IconNode; onOp: (op: Op) => void }
           <input type="checkbox" checked={!!n.tab} onChange={(e) => set({ tab: (e.target as HTMLInputElement).checked })} />
         </label>
       )}
+      {n.shape === "frame" && (
+        <label class="field">
+          <span>角折り</span>
+          <input type="checkbox" checked={!!n.corner} onChange={(e) => set({ corner: (e.target as HTMLInputElement).checked })} />
+        </label>
+      )}
     </>
   );
 }

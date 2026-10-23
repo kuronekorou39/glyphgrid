@@ -25,6 +25,7 @@ export const SHAPE_LABELS: Record<NodeShape, string> = {
   cross: "バツ",
   sparkle: "きらめき",
   cursor: "カーソル",
+  pen: "ペン",
   point: "点(描かない)",
   frame: "枠・画面",
   table: "表",

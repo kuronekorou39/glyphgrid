@@ -25,8 +25,8 @@
 ## 要素
 
 - ノード:`shape`(circle / square / diamond / hexagon / triangle)× `fill`(solid / outline / core)× `size`(s / m / l)。実寸は style.json
-- 記号マーク:check / cross / sparkle / cursor。size で大きさが決まる。線を切る位置や重なりは外接円で判定する
-- 箱:frame(`header` でタイトルバー、`tab` でフォルダ形)/ table(`cols` `rows`、`header` で見出し行)/ text(`lines` 本の横棒)。`w` `h` で大きさを決め、size は使わない
+- 記号マーク:check / cross / sparkle / cursor / pen。size で大きさが決まる。線を切る位置や重なりは外接円で判定する
+- 箱:frame(`header` でタイトルバー、`tab` でフォルダ形、`corner` で角折りのページ形)/ table(`cols` `rows`、`header` で見出し行)/ text(`lines` 本の横棒)。`w` `h` で大きさを決め、size は使わない
 - 描画順は 箱 → エッジ → その他のノード。frame / table の内側に収まったノードは入れ子で、lint の重なり・貫通の対象外
 - エッジ:`route` に加えて `dash`(dashed / dotted)と `arrow`(end / start / both)。省略時は実線・矢印なし
 - 旧形式(version 1 の `kind`: dot / ring / square)は読み込み時に変換する。ops でも `kind` や `shape: "dot"` を別名として受け付ける
