@@ -119,8 +119,8 @@ describe("バッジ・円の直径・見出し行の高さ", () => {
     ]);
     expect(rules(doc)).toEqual([]);
     const svg = renderSvg(doc, style);
-    expect(svg).toMatch(/<mask id="gg-badge-[0-9a-z]+"/);
-    expect(svg).toMatch(/<g mask="url\(#gg-badge-[0-9a-z]+\)">/);
+    expect(svg).toMatch(/<mask id="gg-ko-[0-9a-z]+"/);
+    expect(svg).toMatch(/<g mask="url\(#gg-ko-[0-9a-z]+\)">/);
     expect(rules(build([{ op: "setBox", ids: ["ai"], badge: false }], doc))).toContain("overlap:web,ai");
   });
 

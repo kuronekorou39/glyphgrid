@@ -89,6 +89,13 @@ export function contains(style: Style, container: IconNode, inner: IconNode): bo
   return n.minX >= c.minX + w - EPS && n.maxX <= c.maxX - w + EPS && n.minY >= c.minY + w - EPS && n.maxY <= c.maxY - w + EPS;
 }
 
+/** node が、box より手前にある badge の箱の中に収まっている(box はその部分が切り抜かれて見えない) */
+function hiddenBehind(doc: IconDoc, style: Style, node: IconNode, box: IconNode): boolean {
+  if (!isBox(box.shape)) return false;
+  const boxAt = doc.nodes.indexOf(box);
+  return doc.nodes.some((f, i) => i > boxAt && f.badge && isBox(f.shape) && (f.id === node.id || contains(style, f, node)));
+}
+
 function overlap(doc: IconDoc, style: Style): Issue[] {
   const issues: Issue[] = [];
   for (let i = 0; i < doc.nodes.length; i++) {
@@ -99,6 +106,8 @@ function overlap(doc: IconDoc, style: Style): Issue[] {
       if (contains(style, a, b) || contains(style, b, a)) continue;
       // バッジは枠や表の線の上に重ねるもの(線は切り抜いて描く)
       if ((a.badge && isContainerNode(b)) || (b.badge && isContainerNode(a))) continue;
+      // 手前に重ねた枠(badge の箱)の中にあるものは、それより奥の箱とは重ならない(奥は切り抜かれて見えない)
+      if (hiddenBehind(doc, style, a, b) || hiddenBehind(doc, style, b, a)) continue;
       const gap = nodeGap(a, b, style);
       if (gap < -EPS) issues.push({ rule: "overlap", severity: "error", ids: [a.id, b.id], message: `${a.id} と ${b.id} が重なっています` });
       else if (gap < MIN_NODE_GAP - EPS)

@@ -1,6 +1,6 @@
 import { arrowAt, edgePolyline, roundedPath, type PathCmd, type Point } from "../geometry.js";
 import { MARK_SHAPES, findNode, isBox, type IconDoc, type IconEdge, type IconNode } from "../model.js";
-import { outline } from "../shape.js";
+import { nodeBounds, outline } from "../shape.js";
 import { boxSize, nodeDiameter, type Style } from "../style.js";
 
 const MARK_SET = new Set<string>(MARK_SHAPES);
@@ -238,22 +238,30 @@ function hash(s: string): string {
 }
 
 /**
- * バッジ(badge: true)の下にある枠・表・エッジの線を切り抜くマスク。背景で塗って隠さず、透過でも正しく見える。
+ * バッジ(badge: true)は、自分より奥にあるもの(nodes で先に並んでいる箱と、エッジ)の線を切り抜く。
+ * 背景で塗って隠さないので透過でも正しく見える。箱のバッジは手前に重ねた画面のように、その外形の分だけ奥を隠す。
  * id は切り抜く形から作るので、同じ画面に複数のアイコンを並べても衝突しない(同じ id なら中身も同じ)
  */
-function badgeMask(doc: IconDoc, style: Style): { id: string; defs: string } | null {
-  const badges = doc.nodes.filter((n) => n.badge);
-  if (!badges.length) return null;
+function knockoutMask(doc: IconDoc, style: Style, knockers: IconNode[]): { id: string; defs: string } | null {
+  if (!knockers.length) return null;
   const u = style.unit;
+  const g = style.mark.gap;
   const w = fmt(doc.canvas.cols * u);
   const h = fmt(doc.canvas.rows * u);
-  const holes = badges
-    .map((n) => `<circle cx="${fmt(n.x * u)}" cy="${fmt(n.y * u)}" r="${fmt((nodeDiameter(style, n) / 2 + style.mark.gap) * u)}" fill="#000"/>`)
-    .join("");
-  const id = `gg-badge-${hash(w + h + holes)}`;
+  const holes = knockers
+    .map((n) => {
+      if (isBox(n.shape)) {
+        const b = nodeBounds(style, n);
+        return `<rect x="${fmt((b.minX - g) * u)}" y="${fmt((b.minY - g) * u)}" width="${fmt((b.maxX - b.minX + 2 * g) * u)}" height="${fmt((b.maxY - b.minY + 2 * g) * u)}" rx="${fmt((style.radius.frame + g) * u)}"/>`;
+      }
+      return `<circle cx="${fmt(n.x * u)}" cy="${fmt(n.y * u)}" r="${fmt((nodeDiameter(style, n) / 2 + g) * u)}"/>`;
+    })
+    .join("")
+    .replace(/\/>/g, ' fill="#000" stroke="none"/>');
+  const id = `gg-ko-${hash(w + h + holes)}`;
   return {
     id,
-    defs: `<mask id="${id}" maskUnits="userSpaceOnUse" x="0" y="0" width="${w}" height="${h}"><rect width="${w}" height="${h}" fill="#fff" stroke="none"/>${holes.replace(/fill="#000"/g, 'fill="#000" stroke="none"')}</mask>`,
+    defs: `<mask id="${id}" maskUnits="userSpaceOnUse" x="0" y="0" width="${w}" height="${h}"><rect width="${w}" height="${h}" fill="#fff" stroke="none"/>${holes}</mask>`,
   };
 }
 
@@ -271,12 +279,26 @@ export function renderSvg(doc: IconDoc, style: Style): string {
     `<g fill="none" stroke="${style.stroke.color}" stroke-width="${fmt(style.stroke.width * u)}" stroke-linecap="${style.stroke.linecap}" stroke-linejoin="round">`,
   );
   // 描画順:箱(枠・表・テキスト行)→ エッジ → それ以外のノード。枠の中に置いたものが枠に隠れないようにする
-  const knockout = badgeMask(doc, style);
-  if (knockout) lines.push(knockout.defs, `<g mask="url(#${knockout.id})">`);
-  for (const node of doc.nodes) if (isBox(node.shape)) lines.push(renderNode(node, style));
-  for (const edge of doc.edges) lines.push(...renderEdge(doc, style, edge));
-  if (knockout) lines.push("</g>");
-  for (const node of doc.nodes) if (!isBox(node.shape)) lines.push(renderNode(node, style));
+  const defs: string[] = [];
+  const masked = (parts: string[], knockers: IconNode[]) => {
+    const m = knockoutMask(doc, style, knockers);
+    if (!m || !parts.length) return parts;
+    defs.push(m.defs);
+    return [`<g mask="url(#${m.id})">`, ...parts, "</g>"];
+  };
+  const badges = doc.nodes.filter((n) => n.badge);
+  const body: string[] = [];
+  // 箱は、自分より後ろ(手前)にあるバッジで切り抜く
+  doc.nodes.forEach((node, i) => {
+    if (!isBox(node.shape)) return;
+    body.push(...masked([renderNode(node, style)], badges.filter((b) => doc.nodes.indexOf(b) > i)));
+  });
+  // エッジは、つながっていないバッジすべてで切り抜く(拡大鏡の取っ手のようにバッジにつながる線は切らない)
+  for (const edge of doc.edges) {
+    body.push(...masked(renderEdge(doc, style, edge), badges.filter((b) => b.id !== edge.from && b.id !== edge.to)));
+  }
+  for (const node of doc.nodes) if (!isBox(node.shape)) body.push(renderNode(node, style));
+  lines.push(...defs, ...body);
   lines.push("</g>", "</svg>");
   return lines.join("\n") + "\n";
 }
