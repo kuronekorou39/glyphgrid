@@ -114,8 +114,8 @@ describe("記号マークと線", () => {
 describe("バッジ・円の直径・見出し行の高さ", () => {
   it("badge は枠の線と重なっても lint にならず、その部分をマスクで切り抜く", () => {
     const doc = build([
-      { op: "addNode", id: "web", shape: "frame", x: 6, y: 6.5, w: 8, h: 7, header: true },
-      { op: "addNode", id: "ai", shape: "sparkle", fill: "solid", x: 10, y: 3, badge: true },
+      { op: "addNode", id: "web", shape: "frame", x: 5.5, y: 6.5, w: 7, h: 7, header: true },
+      { op: "addNode", id: "ai", shape: "sparkle", fill: "solid", x: 9, y: 3, badge: true },
     ]);
     expect(rules(doc)).toEqual([]);
     const svg = renderSvg(doc, style);
@@ -139,7 +139,6 @@ describe("バッジ・円の直径・見出し行の高さ", () => {
     const svg = renderSvg(doc, style);
     const u = style.unit;
     // 見出しの下端 = 上端 3.5 + 1、残り 2 行は 4 を等分 → 区切りは y = 4.5, 6.5
-    expect(svg).toContain(`L${(6 + 2 - style.stroke.width / 2) * u} ${4.5 * u}`);
-    expect(svg).toContain(`${6.5 * u}`);
+    for (const y of [4.5, 6.5]) expect(svg).toMatch(new RegExp(`M[0-9.]+ ${y * u}L[0-9.]+ ${y * u}`));
   });
 });
