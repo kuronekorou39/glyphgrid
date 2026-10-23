@@ -2,7 +2,9 @@ import { contentBounds } from "../commands/layout.js";
 import { GRID_STEP } from "../commands/util.js";
 import { edgePolyline, type Point } from "../geometry.js";
 import { EPS, findNode, isBox, isContainerNode, type IconDoc, type IconNode } from "../model.js";
-import { boundaryPoints, nodeBounds, outline, signedDistance } from "../shape.js";
+import { boundaryPoints, contains, nodeBounds, outline, signedDistance } from "../shape.js";
+
+export { contains };
 import type { Style } from "../style.js";
 
 export type Severity = "error" | "warning";
@@ -72,21 +74,6 @@ function nodeGap(a: IconNode, b: IconNode, style: Style): number {
   const one = Math.min(...boundaryPoints(oa).map((p) => signedDistance(ob, p)));
   const two = Math.min(...boundaryPoints(ob).map((p) => signedDistance(oa, p)));
   return Math.min(one, two);
-}
-
-/** inner が container(frame / table)の線の内側に収まっている */
-export function contains(style: Style, container: IconNode, inner: IconNode): boolean {
-  if (!isContainerNode(container) || container.id === inner.id) return false;
-  const c = nodeBounds(style, container);
-  const n = nodeBounds(style, inner);
-  const w = style.stroke.width;
-  if (container.shape === "circle") {
-    // 円の入れ物(レンズ):中身の外接矩形の四隅が、線の内側の円に入っていること
-    const r = (c.maxX - c.minX) / 2 - w;
-    const corners = [[n.minX, n.minY], [n.maxX, n.minY], [n.maxX, n.maxY], [n.minX, n.maxY]] as const;
-    return corners.every(([x, y]) => Math.hypot(x - container.x, y - container.y) <= r + EPS);
-  }
-  return n.minX >= c.minX + w - EPS && n.maxX <= c.maxX - w + EPS && n.minY >= c.minY + w - EPS && n.maxY <= c.maxY - w + EPS;
 }
 
 /** node が、box より手前にある badge の箱の中に収まっている(box はその部分が切り抜かれて見えない) */

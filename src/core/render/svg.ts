@@ -1,6 +1,6 @@
 import { arrowAt, edgePolyline, roundedPath, type PathCmd, type Point } from "../geometry.js";
 import { MARK_SHAPES, findNode, isBox, type IconDoc, type IconEdge, type IconNode } from "../model.js";
-import { nodeBounds, outline } from "../shape.js";
+import { contains, nodeBounds, outline } from "../shape.js";
 import { boxSize, nodeDiameter, type Style } from "../style.js";
 
 const MARK_SET = new Set<string>(MARK_SHAPES);
@@ -295,7 +295,11 @@ export function renderSvg(doc: IconDoc, style: Style): string {
   });
   // エッジは、つながっていないバッジすべてで切り抜く(拡大鏡の取っ手のようにバッジにつながる線は切らない)
   for (const edge of doc.edges) {
-    body.push(...masked(renderEdge(doc, style, edge), badges.filter((b) => b.id !== edge.from && b.id !== edge.to)));
+    const from = findNode(doc, edge.from);
+    const to = findNode(doc, edge.to);
+    // 両端がバッジの入れ物(レンズなど)の中にある線は、その入れ物では切り抜かない
+    const inside = (b: IconNode) => !!from && !!to && contains(style, b, from) && contains(style, b, to);
+    body.push(...masked(renderEdge(doc, style, edge), badges.filter((b) => b.id !== edge.from && b.id !== edge.to && !inside(b))));
   }
   for (const node of doc.nodes) if (!isBox(node.shape)) body.push(renderNode(node, style));
   lines.push(...defs, ...body);

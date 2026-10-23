@@ -1,4 +1,4 @@
-import { MARK_SHAPES, isBox, type IconNode, type NodeShape } from "./model.js";
+import { EPS, MARK_SHAPES, isBox, isContainerNode, type IconNode, type NodeShape } from "./model.js";
 import { boxSize, nodeDiameter, type Style } from "./style.js";
 
 const isMark = (shape: NodeShape) => (MARK_SHAPES as readonly string[]).includes(shape);
@@ -98,3 +98,22 @@ export function nodeBounds(style: Style, node: ShapeNode) {
   const ys = o.pts.map((p) => p.y);
   return { minX: Math.min(...xs), minY: Math.min(...ys), maxX: Math.max(...xs), maxY: Math.max(...ys) };
 }
+
+/** inner が container(frame / table / w を持つ円)の線の内側に収まっている */
+export function contains(style: Style, container: IconNode, inner: IconNode): boolean {
+  if (!isContainerNode(container) || container.id === inner.id) return false;
+  const c = nodeBounds(style, container);
+  const n = nodeBounds(style, inner);
+  const w = style.stroke.width;
+  if (container.shape === "circle") {
+    // 円の入れ物(レンズ):中身の外接矩形の四隅が、線の内側の円に入っていること
+    const r = (c.maxX - c.minX) / 2 - w;
+    // 中身も円(円・記号マーク)なら、中心の距離と半径で正確に判定する
+    const o = outline(style, inner);
+    if (o.type === "circle") return Math.hypot(inner.x - container.x, inner.y - container.y) + o.r <= r + EPS;
+    const corners = [[n.minX, n.minY], [n.maxX, n.minY], [n.maxX, n.maxY], [n.minX, n.maxY]] as const;
+    return corners.every(([x, y]) => Math.hypot(x - container.x, y - container.y) <= r + EPS);
+  }
+  return n.minX >= c.minX + w - EPS && n.maxX <= c.maxX - w + EPS && n.minY >= c.minY + w - EPS && n.maxY <= c.maxY - w + EPS;
+}
+
