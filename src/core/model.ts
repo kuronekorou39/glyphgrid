@@ -1,7 +1,8 @@
 // アイコンのデータモデル。座標はすべてグリッド単位。
 
 /** 基本の形。size トークンで大きさが決まる */
-export const BASIC_SHAPES = ["circle", "square", "diamond", "hexagon", "triangle"] as const;
+/** 基本の形。size トークンで大きさが決まる。point は描かれない点で、線だけの模様の端や中継点に使う */
+export const BASIC_SHAPES = ["circle", "square", "diamond", "hexagon", "triangle", "point"] as const;
 /** 記号マーク。size トークンで大きさが決まる。check / cross は線だけで描き、fill は使わない */
 export const MARK_SHAPES = ["check", "cross", "sparkle", "cursor"] as const;
 /**

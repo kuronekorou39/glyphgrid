@@ -190,7 +190,7 @@ function inconsistentSize(doc: IconDoc): Issue[] {
   for (const e of doc.edges) for (const id of [e.from, e.to]) degree.set(id, (degree.get(id) ?? 0) + 1);
   const groups = new Map<string, IconNode[]>();
   for (const n of doc.nodes) {
-    if (isBox(n.shape)) continue;
+    if (isBox(n.shape) || n.shape === "point") continue;
     const key = `${n.shape}(${n.fill})/${degree.get(n.id) ?? 0}`;
     groups.set(key, [...(groups.get(key) ?? []), n]);
   }

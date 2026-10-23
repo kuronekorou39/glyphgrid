@@ -40,7 +40,7 @@ export function outline(style: Style, node: ShapeNode, inset = 0, scale = 1): Ou
   }
   const d = nodeDiameter(style, node) * scale;
   // マークは線が細く形も凹んでいるので、線を切る位置や重なりの判定は外接円で行う
-  if (node.shape === "circle" || isMark(node.shape)) return { type: "circle", c, r: Math.max(0, d / 2 - inset) };
+  if (node.shape === "circle" || node.shape === "point" || isMark(node.shape)) return { type: "circle", c, r: Math.max(0, d / 2 - inset) };
   if (node.shape === "square") return rect(c, d / 2 - inset, d / 2 - inset);
   const { sides, shiftY } = POLYGONS[node.shape]!;
   const R = d / 2;

@@ -180,6 +180,7 @@ function boxElement(node: IconNode, style: Style): string {
 }
 
 function renderNode(node: IconNode, style: Style): string {
+  if (node.shape === "point") return "";
   if (isBox(node.shape)) return boxElement(node, style);
   if (MARK_SET.has(node.shape)) return markElement(node, style);
   if (node.fill === "solid") return shapeElement(node, style, true);
@@ -301,7 +302,11 @@ export function renderSvg(doc: IconDoc, style: Style): string {
     const inside = (b: IconNode) => !!from && !!to && contains(style, b, from) && contains(style, b, to);
     body.push(...masked(renderEdge(doc, style, edge), badges.filter((b) => b.id !== edge.from && b.id !== edge.to && !inside(b))));
   }
-  for (const node of doc.nodes) if (!isBox(node.shape)) body.push(renderNode(node, style));
+  for (const node of doc.nodes) {
+    if (isBox(node.shape)) continue;
+    const el = renderNode(node, style);
+    if (el) body.push(el);
+  }
   lines.push(...defs, ...body);
   lines.push("</g>", "</svg>");
   return lines.join("\n") + "\n";

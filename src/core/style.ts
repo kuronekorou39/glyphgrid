@@ -47,6 +47,7 @@ export const DEFAULT_STYLE: Style = {
     cross: { s: 1.0, m: 1.5, l: 2.2 },
     sparkle: { s: 1.5, m: 2.3, l: 3.2 },
     cursor: { s: 1.4, m: 2.0, l: 2.8 },
+    point: { s: 0, m: 0, l: 0 },
   },
   core: 0.4,
   radius: { edgeCorner: 0.75, square: 0.12, frame: 0.35 },
