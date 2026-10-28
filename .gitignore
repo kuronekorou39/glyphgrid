@@ -9,3 +9,10 @@ out/
 docs/
 CLAUDE_init.md
 Gemini_Generated_Image_*
+
+# 作業中のセット(非公開のものを含む)。見本の sample / showcase だけ入れる
+sets/*
+!sets/sample/
+!sets/showcase/
+# 見本に足した作業用のアイコン(番号の付いていないもの)
+sets/*/icons/[!0-9]*.icon.json
